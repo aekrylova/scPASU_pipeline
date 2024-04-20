@@ -1,24 +1,36 @@
 #!/usr/bin/bash
 
 #BSUB -W 24:00
-#BSUB -n 4
+#BSUB -n 36
 #BSUB -M 16
 #BSUB -R rusage[mem=16]
-#BSUB -o /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/output/KDM6A_urothelial_pa_ref_stats.%J.out
-#BSUB -e /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/error/KDM6A_urothelial_pa_ref_stats.%J.err
-#BSUB -q medium
-#BSUB -J KDM6A_urothelial_pa_ref_stats
+#BSUB -o /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/output/runname_compartmentname_pa_ref_stats.%J.out
+#BSUB -e /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/error/runname_compartmentname_pa_ref_stats.%J.err
+#BSUB -q e40medium
+#BSUB -J runname_compartmentname_pa_ref_stats
 #BSUB -u bnle@mdanderson.org
 #BSUB -B
 #BSUB -N
 
 source activate scPASU_env
 
-compartment=urothelial
-dir=$SCRATCH/KDM6A_scPASU_run/outputs/${compartment}/
-chrs='chr1\|chr2\|chr3\|chr4\|chr5\|chr6\|chr7\|chr8\|chr9\|chr10\|chr11\|chr12\|chr13\|chr14\|chr15\|chr16\|chr17\|chr18\|chr19\|chr20\|chr21\|chr22\|chrX\|chrY'
-refstats=${dir}${compartment}_noPASfiltering_PA_ref_stats.txt
+# Variable
+dir=dirpath
+compartment=compartmentname
+dir=${dir}${compartment}/
+chrs=chrsname
+chrs=$(echo $chrs | sed 's/,/\\|/g')
+
+# Argument
 PAS_filtering=false
+
+if [ $PAS_filtering == 'true' ]
+   then PAS_status=PASfiltering
+else
+   PAS_status=noPASfiltering
+fi
+
+refstats=${dir}${compartment}_${PAS_status}_PA_ref_stats.txt
 
 if test -f $refstats; then echo Delete the existing $(basename "$refstats"); rm $refstats; fi
 
@@ -42,7 +54,7 @@ for prong in all_filtered_reads polyA_reads; do
    for strand in plus minus; do
        if [ $prong == 'all_filtered_reads' ]; then
            export bam_dir=${dir}1e_merged_bam/
-           export bam_file=$(ls ${bam_dir}*genomicAfiltered*${strand}.bam)
+           export bam_file=$(ls ${bam_dir}dedup_uniq_genomicAfiltered_merged_${strand}.bam)
            export polyA_dir=${dir}2b_polya/after_genomicAfiltering/
        elif [ $prong == 'polyA_reads' ]; then
            export bam_dir=${dir}2b_polya/before_genomicAfiltering/bam_files/
@@ -75,9 +87,9 @@ for prong in all_filtered_reads polyA_reads; do
       done
       
       if [ $strand == 'plus' ]; then
-           export num_plus_peaks=$(echo $new_peaks | sort | uniq | wc -w)
+           export num_plus_peaks=$(echo $new_peaks | tr ' ' '\n' | sort | uniq | wc -l)
       elif [ $strand == 'minus' ]; then
-           export num_minus_peaks=$(echo $new_peaks | sort | uniq | wc -w)
+           export num_minus_peaks=$(echo $new_peaks | tr ' ' '\n' | sort | uniq | wc -l)
       fi
    done      
    

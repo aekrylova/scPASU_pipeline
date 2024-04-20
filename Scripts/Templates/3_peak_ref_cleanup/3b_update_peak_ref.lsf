@@ -4,10 +4,10 @@
 #BSUB -n 16
 #BSUB -M 16
 #BSUB -R rusage[mem=16]
-#BSUB -o /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/output/KDM6A_urothelial_3b_update_peak_ref_noPASfiltering.%J.out
-#BSUB -e /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/error/KDM6A_urothelial_3b_update_peak_ref_noPASfiltering.%J.err
+#BSUB -o /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/output/runname_compartmentname_3b_update_peak_ref_noPASfiltering.%J.out
+#BSUB -e /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/error/runname_compartmentname_3b_update_peak_ref_noPASfiltering.%J.err
 #BSUB -q short
-#BSUB -J KDM6A_urothelial_3b_update_peak_ref_noPASfiltering
+#BSUB -J runname_compartmentname_3b_update_peak_ref_noPASfiltering
 #BSUB -u bnle@mdanderson.org
 #BSUB -B
 #BSUB -N
@@ -15,20 +15,23 @@
 source activate scPASU_env
 module load bedtools/2.30.0
 
-### Initialize variables ###
-
-compartment=urothelial
+# Variable
+dir=dirpath
+compartment=compartmentname
+dir=${dir}${compartment}/
 file_prefix=${compartment}
-dir=$SCRATCH/KDM6A_scPASU_run/outputs/${compartment}/
-script_dir=$SCRATCH/KDM6A_scPASU_run/Scripts/${compartment}/3_peak_ref_cleanup/
+script_dir=scriptpath
+script_dir=${script_dir}/3_peak_ref_cleanup/
+ref_genome=fastapath
+bam_dir=${dir}1e_merged_bam/
+bam=${bam_dir}dedup_uniq_genomicAfiltered_merged.bam
+
+# Argument
 maxwidth=1000
-ref_genome=$SCRATCH/GRCh38/fasta/genome.fa
 PAS_filtering=false
 pr_extn="5,50"
 tes_prox_distance=100
-chrs="chr1,chr2,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19,chr20,chr21,chr22,chrX,chrY"
-bam_dir=${dir}1e_merged_bam/
-bam=${bam_dir}dedup_uniq_genomicAfiltered_merged.bam
+chrs=chrsname
 min_cov=10
 cores=16
 

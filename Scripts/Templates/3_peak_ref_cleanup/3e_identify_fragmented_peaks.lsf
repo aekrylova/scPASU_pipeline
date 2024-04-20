@@ -4,49 +4,51 @@
 #BSUB -n 32
 #BSUB -M 64
 #BSUB -R rusage[mem=64]
-#BSUB -o /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/output/KDM6A_urothelial_3e_identify_fragmented_peaks.%J.out
-#BSUB -e /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/error/KDM6A_urothelial_3e_identify_fragmented_peaks.%J.err
+#BSUB -o /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/output/runname_compartmentname_3e_identify_fragmented_peaks.%J.out
+#BSUB -e /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/error/runname_compartmentname_3e_identify_fragmented_peaks.%J.err
 #BSUB -q e40medium
-#BSUB -J KDM6A_urothelial_3e_identify_fragmented_peaks
+#BSUB -J runname_compartmentname_3e_identify_fragmented_peaks
 #BSUB -u bnle@mdanderson.org
 #BSUB -B
 #BSUB -N
 
 source activate scPASU_env
 module load bedtools/2.30.0
+module load bowtie2
 
-function execute_command {
-    echo "$(date +"%Y-%m-%d %H:%M:%S"):"
-    "$@"
-}
-
-### Initialize variables ###
-
-ref_genome=$SCRATCH/GRCh38/fasta/genome.fa
-compartment=urothelial
-PAS_filtering=false
-dir=$SCRATCH/KDM6A_scPASU_run/outputs/${compartment}/
-scriptdir=$SCRATCH/KDM6A_scPASU_run/Scripts/${compartment}/3_peak_ref_cleanup/
+# Variable
+dir=dirpath
+compartment=compartmentname
+dir=${dir}${compartment}/
+script_dir=scriptpath
+script_dir=${script_dir}/3_peak_ref_cleanup/
+ref_genome=fastapath
 in=${dir}3g_peak_classification/
 out=${dir}3h_fragmented_peaks_to_merge/
 bamdir=${dir}1e_merged_bam/
 refdir=${dir}3f_merge_two_prongs/
+ucsc_utilities_dir=ucscutilitiespath
+
+# Argument
+PAS_filtering=false
 binsize=1
 gap_threshold=0
 min_coverage=10
 spliced_read_pct_thres=40
 realign_peak_read_pct_thres=40
 ncores=32
+
 if [ $PAS_filtering == 'true' ]
    then fprefix=${compartment}
 else
    fprefix=${compartment}_noPASfiltering
 fi
+
 peak_saf=${refdir}${fprefix}_4thtu_assigned_peak_universe_updated.saf
 
 mkdir -p ${out}
 
-execute_command echo Extract transcripts likely causing peak fragmentation...
+echo Extract transcripts likely causing peak fragmentation...
 transcripts=${in}${fprefix}_transcripts_causing_peak_fragmentation.txt
 for strand in plus minus; do
    bed_input=${out}${fprefix}_transcripts_causing_peak_fragmentation_exons_${strand}.bed
@@ -61,10 +63,10 @@ for strand in plus minus; do
    echo Extract exons of these transcripts from $ref_genome
    bedtools getfasta -fi $ref_genome -bed $bed_input -s -nameOnly -fo $fa_output
    echo Stitch the exons to obtain these transcripts
-   Rscript ${scriptdir}3e_stitch_exons.R -i $fa_output -o ${out}${fprefix}_transcripts_causing_peak_fragmentation_${strand}.fa
+   Rscript ${script_dir}3e_stitch_exons.R -i $fa_output -o ${out}${fprefix}_transcripts_causing_peak_fragmentation_${strand}.fa
 done
 
-execute_command echo Filter bam file for spliced reads overlapping with merge candidates...
+echo Filter bam file for spliced reads overlapping with merge candidates...
 
 cd $out
 for strand in plus minus; do
@@ -86,22 +88,21 @@ for strand in plus minus; do
 
    echo Count reads for merge candidates...
    samtools view -b -h -L $subset_peak_bed $bamfile > $subset_bam_file
-   Rscript ${scriptdir}feature_counts.R -r $subset_peak_saf -b $subset_bam_file -o $out -f ${fprefix}_${strand}_subset -c $ncores -i no
+   Rscript ${script_dir}feature_counts.R -r $subset_peak_saf -b $subset_bam_file -o $out -f ${fprefix}_${strand}_subset -c $ncores -i no
    echo Count spliced reads for merge candidates...
    spliced_only_sam_temp=${subset_bam_file%.bam}_spliced_only.sam
    samtools view -H $subset_bam_file > $spliced_only_sam_temp
    samtools view $subset_bam_file | awk '($6 ~ /N/)' >> $spliced_only_sam_temp
    samtools view -bS $spliced_only_sam_temp > ${spliced_only_sam_temp%.sam}.bam
    samtools view $subset_bam_file | awk '($6 ~ /N/)' | awk '{print "@"$1"\n"$10"\n+\n"$11}' > ${subset_bam_file%.bam}_spliced_only.fastq   
-   Rscript ${scriptdir}feature_counts.R -r $subset_peak_saf -b ${spliced_only_sam_temp%.sam}.bam -o $out -f ${fprefix}_${strand}_subset_spliced_reads -c $ncores -i no
+   Rscript ${script_dir}feature_counts.R -r $subset_peak_saf -b ${spliced_only_sam_temp%.sam}.bam -o $out -f ${fprefix}_${strand}_subset_spliced_reads -c $ncores -i no
    
    rm ${subset_peak_bed}_temp $spliced_only_sam_temp $subset_bam_file
 done
 
-execute_command echo Call peaks on the realignment of spliced reads from merge candidates against their likely exomes...
+echo Call peaks on the realignment of spliced reads from merge candidates against their likely exomes...
 for strand in plus minus; do
    ### Realign spliced reads from merge candidates against transcripts likely causing peak fragmentation
-   source activate ChIP-Seq_env
    bowtie2_prefix=${fprefix}_transcripts_causing_peak_fragmentation_${strand}
    bowtie2-build ${bowtie2_prefix}.fa ${bowtie2_prefix}
    realign_prefix=${fprefix}_realign_merge_candidates_${strand}
@@ -109,7 +110,6 @@ for strand in plus minus; do
    bowtie2 --local --threads $ncores -x ${bowtie2_prefix} -X 2000 -U ${fastq_file} -S ${realign_prefix}.sam
    
    ### Preparing files for IGV 
-   source activate scPASU_env
    samtools faidx ${bowtie2_prefix}.fa
    samtools view -bS ${realign_prefix}.sam > ${realign_prefix}.bam
    samtools sort ${realign_prefix}.bam -@ $ncores -o ${realign_prefix}.sorted.bam > ${realign_prefix}.sorted.bam
@@ -118,10 +118,10 @@ for strand in plus minus; do
 
    ### Call peaks
    bamCoverage -b ${realign_prefix}.sorted.bam -o ${realign_prefix}.bw -p $ncores -v --binSize ${binsize}
-   bigWigToBedGraph ${realign_prefix}.bw ${realign_prefix}.bedGraph
+   ${ucsc_utilities_dir}/bigWigToBedGraph ${realign_prefix}.bw ${realign_prefix}.bedGraph
 done
 
-Rscript ${scriptdir}3e_peak_calling_from_bedGraph.R -f $fprefix -b $out -o $out -g $gap_threshold -m $min_coverage
+Rscript ${script_dir}3e_peak_calling_from_bedGraph.R -f $fprefix -b $out -o $out -g $gap_threshold -m $min_coverage
 
 realign_peak=${fprefix}_spliced_reads_realign_peaks.txt
 for strand in plus minus; do   
@@ -135,10 +135,9 @@ for strand in plus minus; do
    elif [ $strand == 'minus' ]; then 
       awk -v strand="-" -v OFS='\t' '$6 == strand { print $4,$1,$2,$3,$6}' $realign_peak >> $saf
    fi
-   Rscript ${scriptdir}feature_counts.R -r $saf -b $bamfile -o $out -f ${fprefix}_spliced_reads_realign_peaks_${strand} -c $ncores -i no
+   Rscript ${script_dir}feature_counts.R -r $saf -b $bamfile -o $out -f ${fprefix}_spliced_reads_realign_peaks_${strand} -c $ncores -i no
 done
 
-execute_command echo Identify fragmented peaks to merge...
+echo Identify fragmented peaks to merge...
 ref=${in}${fprefix}_peak_universe_classified.txt 
-Rscript ${scriptdir}3e_identify_fragmented_peaks.R -t $transcripts -p $realign_peak -d $out -f $fprefix -o $out -s $spliced_read_pct_thres -r $realign_peak_read_pct_thres -b $ref -n $ncores
-execute_command echo DONE!
+Rscript ${script_dir}3e_identify_fragmented_peaks.R -t $transcripts -p $realign_peak -d $out -f $fprefix -o $out -s $spliced_read_pct_thres -r $realign_peak_read_pct_thres -b $ref -n $ncores
