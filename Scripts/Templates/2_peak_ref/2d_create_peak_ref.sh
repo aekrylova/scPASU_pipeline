@@ -24,7 +24,7 @@ while getopts "m:p:o:s:c:n:t:" opt;do
     ;; #-s specify strand as plus or minus
   c)
     chr=$OPTARG
-    ;; # -c specify chr (1-22 or X or Y or multiple chromosomes separated by _)
+    ;; # -c specify chr (1-22 or X or Y or multiple chromosomes separated by ,)
   n)
     min_polya=$OPTARG
     ;; #-n minimum polya reads that a peak must be supported by
@@ -34,11 +34,6 @@ while getopts "m:p:o:s:c:n:t:" opt;do
     ;; #-t script dir path 
   esac
 done
-
-function execute_command {
-    echo "$(date +"%Y-%m-%d %H:%M:%S"):"
-    "$@"
-}
 
 ### Set paths ###
 
@@ -68,10 +63,9 @@ mkdir -p ${peak_ref_table}
 mkdir -p ${pr_dir}
 mkdir -p ${final_peak_ref}
  
-
 # Create chr file (currently doing it manually to exclude non standard chr)
 
-chr=$(echo $chr | tr '_' ' ')
+chr=$(echo $chr | tr ',' ' ')
 
 # (b) Specify peaks and polya  files
 
@@ -81,10 +75,10 @@ polya_file=${polya_reads_dir}*${strand}*nowrongstrand.bed
 
 # (c) Split peak columns by chr, subset desired col and add strand column
 
-execute_command echo Creating peak from $peaks_file and polya files from $polya_file by chr: ${chr}
+echo Creating peak from $peaks_file and polya files from $polya_file by chr: ${chr}
 
 for c in $(echo $chr); do
-execute_command echo Creating peak ref for ${c}...
+echo Creating peak ref for ${c}...
 
 if [ ${strand} == 'plus' ]
 then
@@ -100,25 +94,25 @@ cat ${polya_file} | grep -w ${c} | awk 'OFS="\t" {print $1,$2,$3,$4,$5,$6}' > ${
 
 # (e) sort 
 
-execute_command echo Sort peaks by start and end coordinates... 
+echo Sort peaks by start and end coordinates... 
 cat  ${peaks_per_chr}peaks_${c}_${strand}.bed | sort -k2,2n -k3,3n >  ${peaks_per_chr}peaks_${c}_sorted_${strand}.bed
-execute_command echo Sort polyA reads by start and end coordinates...
+echo Sort polyA reads by start and end coordinates...
 cat  ${polya_per_chr}polya_${c}_${strand}.bed | sort -k2,2n -k3,3n >  ${polya_per_chr}polya_${c}_sorted_${strand}.bed
 
 ### 1a. Run intersect ###
 
-execute_command echo Intersect...
+echo Intersect...
 
 bedtools intersect -a ${peaks_per_chr}peaks_${c}_sorted_${strand}.bed -b ${polya_per_chr}polya_${c}_sorted_${strand}.bed -wa -wb -loj > ${int_dir}peaks_int_polya_${c}_${strand}.bed
 
 ### 1b. Sort intersect table ###
 
-execute_command echo Sort intersect table...
+echo Sort intersect table...
 cat ${int_dir}peaks_int_polya_${c}_${strand}.bed | sort -k6,6  > ${int_dir}peaks_int_polya_${c}_sorted_${strand}.bed
 
 ### 1c. Tag non-poly peaks
 
-execute_command echo Tag polyA peaks...
+echo Tag polyA peaks...
 awk  'FS=OFS="\t" {if($6==".") {$12="non_polya"} else {$12="polya"}; {print $0}}' ${int_dir}peaks_int_polya_${c}_sorted_${strand}.bed > ${int_dir}peaks_int_polya_${c}_tagged_${strand}.bed
 
 ### 1d. Sort by polya column
@@ -126,17 +120,17 @@ cat ${int_dir}peaks_int_polya_${c}_tagged_${strand}.bed | sort -k12,12 > ${int_d
 
 ### 2. Create peaks count
 
-execute_command echo Count how many polyA reads each polyA intersect with and sort peaks by count...
+echo Count how many polyA reads each polyA intersect with and sort peaks by count...
 cat ${int_dir}peaks_int_polya_${c}_tagged_${strand}.bed | grep -w polya | awk 'FS=OFS="\t" {print $4}' | sort | uniq -c | sort -k1,1n > ${peaks_count_dir}peaks_${c}_count_sorted_${strand}.txt
 
 ### 3a. Create peak ref table ###
-execute_command echo Create peak ref table from ${int_dir}peaks_int_polya_${c}_tagged_sorted_${strand}.bed...
+echo Create peak ref table from ${int_dir}peaks_int_polya_${c}_tagged_sorted_${strand}.bed...
 cat ${int_dir}peaks_int_polya_${c}_tagged_sorted_${strand}.bed | sort -u -k4,4  > ${peak_ref_table}peak_ref_${c}_${strand}.bed
 
 ### 3b. Create inferred PR table ### (contains 3 columns - peakID, inf_pr_start and inf_pr_end)
 
 f=$(awk '{print $2}' ${peaks_count_dir}peaks_${c}_count_sorted_${strand}.txt)
-execute_command echo Create peak ref table with the inferred PR, which are the ranges that encompass the polyA sites of all the intersected polyA reads...
+echo Create peak ref table with the inferred PR, which are the ranges that encompass the polyA sites of all the intersected polyA reads...
 if test -f ${pr_dir}pr_${c}_${strand}.bed; then echo Delete the existing ${pr_dir}pr_${c}_${strand}.bed; rm ${pr_dir}pr_${c}_${strand}.bed; fi
 
 for peaks in ${f[*]};do
@@ -144,13 +138,13 @@ cat ${int_dir}peaks_int_polya_${c}_sorted_${strand}.bed | grep -w ${peaks}  | aw
 done
 
 # 3c. Sort
-execute_command echo Sort peaks by the starts and ends of the inferred PRs...
+echo Sort peaks by the starts and ends of the inferred PRs...
 cat ${pr_dir}pr_${c}_${strand}.bed | sort -k2,2n -k3,3n > ${pr_dir}pr_${c}_sorted_${strand}.bed
 
 ### 3d. Add inferred PR, peak & PR width and polyA count  ###
-execute_command echo Process the last peak ref table, including filtering for peaks with at least ${min_polya} reads
+echo Process the last peak ref table, including filtering for peaks with at least ${min_polya} reads
 Rscript ${script_dir}2d_update_peak_ref.R ${outdir} ${strand} ${c} ${min_polya}
 
-execute_command echo Finish creating peak ref for ${c}!
+echo Finish creating peak ref for ${c}!
 
 done
