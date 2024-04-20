@@ -121,6 +121,7 @@ for prong in all_filtered_reads polyA_reads; do
       echo 'Number of peaks with PAS:'$'\t'${num_plus_PAS_peaks}$'\t'${num_minus_PAS_peaks}$'\t'$((num_plus_PAS_peaks+num_minus_PAS_peaks)) >> $refstats
       echo 'Number of peaks without PAS but near a TES:'$'\t'${num_plus_noPAS_nearTES_peaks}$'\t'${num_minus_noPAS_nearTES_peaks}$'\t'$((num_plus_noPAS_nearTES_peaks+num_minus_noPAS_nearTES_peaks)) >> $refstats
       echo 'Number of PAS-filtered peaks:'$'\t'${num_plus_PASfiltered_peaks}$'\t'${num_minus_PASfiltered_peaks}$'\t'$((num_plus_PASfiltered_peaks+num_minus_PASfiltered_peaks)) >> $refstats
+      PAS_status=''
    else
       PAS_status=noPASfiltering
    fi
