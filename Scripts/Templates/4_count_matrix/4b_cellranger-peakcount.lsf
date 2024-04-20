@@ -1,0 +1,35 @@
+#!/bin/sh
+
+#BSUB -W 24:00
+#BSUB -n 16
+#BSUB -M 200
+#BSUB -R rusage[mem=200]
+#BSUB -o /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/output/runname_compartmentname_4b_cellranger-peakcount_samplename.%J.out
+#BSUB -e /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/error/runname_compartmentname_4b_cellranger-peakcount_samplename.%J.err
+#BSUB -q e40medium
+#BSUB -J runname_compartmentname_4b_cellranger-peakcount_samplename
+#BSUB -u bnle@mdanderson.org
+#BSUB -B
+#BSUB -N
+
+module load cellranger/7.1.0
+
+dir=dirpath
+compartment=compartmentname
+dir=${dir}${compartment}/
+sample=samplename
+ref_dir=${dir}genomename_runname_${compartment}/
+
+fastq_dir=${dir}4a_BamToFastq/${sample}/
+sample_dir=$(ls $fastq_dir | grep $sample)
+fastq_dir=${fastq_dir}${sample_dir} 
+outdir=${dir}4b_cellranger_peakcount/
+
+mkdir -p ${outdir}
+cd ${outdir}
+
+# Argument
+ncores=16
+localmem=200
+
+cellranger count --id $sample --fastqs=${fastq_dir} --sample=${sample} --localcores=16 --localmem=${localmem} --transcriptome=${ref_dir}

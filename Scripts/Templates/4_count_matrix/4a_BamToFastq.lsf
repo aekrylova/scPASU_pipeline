@@ -1,0 +1,44 @@
+#!/usr/bin/bash
+
+#BSUB -W 24:00
+#BSUB -n 32
+#BSUB -M 100
+#BSUB -R rusage[mem=100]
+#BSUB -o /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/output/runname_compartmentname_BamToFastq_samplename.%J.out
+#BSUB -e /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/error/runname_compartmentname_BamToFastq_samplename.%J.err
+#BSUB -q e40medium
+#BSUB -J runname_compartmentname_BamToFastq_samplename
+#BSUB -u bnle@mdanderson.org
+#BSUB -B
+#BSUB -N
+
+# Variable
+dir=dirpath
+compartment=compartmentname
+dir=${dir}${compartment}/
+sample=samplename
+fprefix=${sample}_${compartment}
+bamfile=${dir}1d_subset_bam/${sample}_dedup_uniq_filtered_${compartment}.bam
+outdir=${dir}4a_BamToFastq/
+bamtofastq_dir=bamtofastqpath
+
+mkdir -p $outdir
+
+# Argument
+ncores=32
+
+echo Convert bam to fastq for $fprefix...
+${bamtofastq_dir}/bamtofastq --nthreads=${ncores} $bamfile ${outdir}${sample}
+
+fastq_dir=${outdir}${sample}/
+sample_dir=$(ls $fastq_dir | grep ${sample})
+fastq_dir=${fastq_dir}${sample_dir}/
+cd $fastq_dir
+
+if ! ls | grep -q "^bamtofastq"; then 
+   echo "Filenames do not need to be modified"
+else 
+   for f in $(ls bamtofastq*)
+       do mv $f ${sample}${f#"bamtofastq"}
+   done
+fi

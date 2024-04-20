@@ -1,0 +1,41 @@
+#BSUB -W 24:00
+#BSUB -n 16
+#BSUB -M 180
+#BSUB -R rusage[mem=180]
+#BSUB -o /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/output/cellranger_mkref_genomename_runname_compartmentname.%J.out
+#BSUB -e /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/error/cellranger_mkref_genomename_runname_compartmentname.%J.err
+#BSUB -q e40medium
+#BSUB -J cellranger_mkref_genomename_runname_compartmentname
+#BSUB -u bnle@mdanderson.org
+#BSUB -B
+#BSUB -N
+
+source activate scPASU_env
+module load cellranger/7.1.0
+
+# Variable
+dir=dirpath
+compartment=compartmentname
+dir=${dir}${compartment}/
+fprefix=runname_${compartment}
+genome=genomename_${fprefix}
+fasta=fastapath
+script_dir=scriptpath
+script_dir=${script_dir}/4_count_matrix/
+wd=${dir}3h_fragmented_peaks_to_merge/
+
+# Argument
+version=2024
+PAS_filtering=true
+ncores=16
+memgb=160
+
+ref=${wd}${compartment}_$(if [ $PAS_filtering == 'true' ]; then continue; else echo noPASfiltering_; fi)final_peak_universe_updated.txt
+gtf=${wd}${compartment}_$(if [ $PAS_filtering == 'true' ]; then continue; else echo noPASfiltering_; fi)final_peak_universe_updated.gtf
+
+echo Convert final polyA site reference to gtf file format...
+Rscript ${script_dir}ref2gtf.R -b $ref -f $fprefix -o $wd
+
+echo Create reference package...
+cellranger mkref --ref-version="$version" \
+    --genome="$genome" --fasta="$fasta" --genes="$gtf" --nthreads=$ncores --memgb=$memgb
