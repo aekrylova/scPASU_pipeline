@@ -1,0 +1,19 @@
+#!/usr/bin/bash
+
+#BSUB -W 3:00
+#BSUB -n 32
+#BSUB -M 100
+#BSUB -R rusage[mem=100]
+#BSUB -o /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/output/Ureter10_urothelial_drawUTR3pool_WUI_APA_genes_UTR3_lengthening_ranges.%J.out
+#BSUB -e /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/error/Ureter10_urothelial_drawUTR3pool_WUI_APA_genes_UTR3_lengthening_ranges.%J.err
+#BSUB -q e40short
+#BSUB -J Ureter10_urothelial_drawUTR3pool_WUI_APA_genes_UTR3_lengthening_ranges
+#BSUB -u bnle@mdanderson.org
+#BSUB -B
+#BSUB -N
+
+source activate scPASU_env
+
+#Rscript drawUTR3pool.R -o /rsrch6/scratch/mol_cgenesis/bnle/Ureter10_scPASU_run/outputs/urothelial/5b_APA_testing/differentiation_stage_cellranger_peakcount/ -t /rsrch6/scratch/mol_cgenesis/bnle/Ureter10_scPASU_run/outputs/urothelial/hg38_turef/genes.rds -f WUI_APA_genes_UTR3_shortening_ranges_NULL -b WUI_APA_genes_UTR3_shortening_ranges.bed -n 32 -m 10
+
+Rscript drawUTR3pool.R -o /rsrch6/scratch/mol_cgenesis/bnle/Ureter10_scPASU_run/outputs/urothelial/5b_APA_testing/differentiation_stage_cellranger_peakcount/ -t /rsrch6/scratch/mol_cgenesis/bnle/Ureter10_scPASU_run/outputs/urothelial/hg38_turef/genes.rds -f WUI_APA_genes_UTR3_lengthening_ranges_NULL -b WUI_APA_genes_UTR3_lengthening_ranges.bed -n 32 -m 10

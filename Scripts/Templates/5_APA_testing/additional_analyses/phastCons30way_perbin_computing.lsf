@@ -1,0 +1,26 @@
+#!/usr/bin/bash
+
+#BSUB -W 3:00
+#BSUB -n 32
+#BSUB -M 900
+#BSUB -R rusage[mem=900]
+#BSUB -o /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/output/Ureter10_urothelial_phastCons30way_motif_WUI_APA_genes_UTR3_lengthening_ranges.%J.out
+#BSUB -e /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/error/Ureter10_urothelial_phastCons30way_motif_WUI_APA_genes_UTR3_lengthening_ranges.%J.err
+#BSUB -q e80short
+#BSUB -J Ureter10_urothelial_phastCons30way_motif_WUI_APA_genes_UTR3_lengthening_ranges
+#BSUB -u bnle@mdanderson.org
+#BSUB -B
+#BSUB -N
+
+source activate scPASU_env
+
+phastcon30way_dir='/rsrch6/scratch/mol_cgenesis/bnle/hg38.phastCons30way/hg38.30way.phastCons/'
+wd='/rsrch6/scratch/mol_cgenesis/bnle/Ureter10_scPASU_run/outputs/urothelial/5b_APA_testing/differentiation_stage_cellranger_peakcount/'
+meme_dir=${wd}meme_motif_results/
+#fprefix=WUI_APA_genes_UTR3_shortening_ranges
+fprefix=WUI_APA_genes_UTR3_lengthening_ranges
+bin_size=10
+num_motif=5
+ncores=32
+
+Rscript phastCons30way_perbin_computing.R -p ${phastcon30way_dir} -d $wd -o ${meme_dir} -f $fprefix -b ${bin_size} -m ${num_motif} -n $ncores 
