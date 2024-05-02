@@ -6,8 +6,8 @@ Alternative Polyadenylation (APA) analysis utilizes 3' end sequencing data. Inte
 
 Create a conda environment.
 ```bash
-conda create --name scPASU_env2 python=3.10
-conda activate scPASU_env2
+conda create --name scPASU_env python=3.10
+conda activate scPASU_env
 ```
 Install required R libraries.
 ```bash
@@ -43,7 +43,7 @@ To make a copy of the template scripts in a new directory for your analysis, fil
 ```bash
 bash scPASU_variable_initialize.sh
 ```
-**Note**: Variable auto-population applies to scripts from step 1–4, which need to be processed on a high-performance computing cluster (HPC) because of the computational resources they might require. And users still need to change the arguments of each script, which will be explained below, as they see fit for their data.
+**Note**: Variable auto-population applies to scripts from step 1–4, which need to be processed on a high-performance computing cluster (HPC) because of the computational resources they might require. And users may still need to change the arguments of each script, especially those shown in blocks of codes below, as they see fit for their data.
 
 ## Step 1: Data preprocessing
 
@@ -61,9 +61,9 @@ NTHREADS=32 #number of threads for parallel computing
 COVLEN=300 #maximal coverage distance 
 MINSNRLEN=10 #minimum length of A-SNRs
 ```
-If applied, processed BAM files need to be subsetted for the compartment/cell type of interest (`1c_subset_bam.lsf`). Beforehand, `mkdir -p ${outdir}/barcode/` and place files containing cell barcodes of the compartment/cell type of interest from each sample there. These files should contain only these barcodes, one per row, and the barcodes should be the same as those found in the `barcodes.tsv.gz` output of `cellranger`.
+If applied, processed BAM files need to be subsetted for the compartment/cell type of interest (`1c_subset_bam.lsf`). Beforehand, `mkdir -p ${outdir}/barcode/` and place files containing cell barcodes of the compartment/cell type of interest from each sample there. These files should contain only these barcodes, one per row, no quotation mark, and the barcodes should be the same as those found in the `barcodes.tsv.gz` output of `cellranger`.
 
-Since these scripts need to be performed for each sample separately, users can automate submission of jobs for multiple samples with `job_submission_bysample.sh` (Make sure to hash out all but one script at a time).
+Since these scripts need to be performed for each sample separately, users can automate submission of jobs for multiple samples with `job_submission_bysample.sh`. **Make sure to hash out all but one script at a time**.
 ```bash
 bash job_submission_bysample.sh 
 ``` 
@@ -75,7 +75,7 @@ bsub < 1d2_merge_bam.lsf
 ``` 
 ## Step 2: Peak calling and retention
 
-From step 2 to halfway through step 3, the pipeline will be run in two parallel prongs called **all_filtered_reads** (reads that have survived all filtering in step 1) and **polyA_reads** (poly(A) junction reads identified from all deduplicated and non-ambiguously mapped reads) to give the latter set of reads more weight. True poly(A) junction reads could be accidentally removed by ``polyAfilter.py``. The ``samToPolyA.pl`` script, which we use to detect poly(A) junction reads, potentially allows distinguishing true poly(A) junctions from genomic A primed reads based on soft-clipping.
+From step 2 to halfway through step 3, the pipeline will be run in two parallel prongs called **all_filtered_reads** (reads that have survived all filtering in step 1) and **polyA_reads** (poly(A) junction reads identified from all deduplicated and non-ambiguously mapped reads) to give the latter set of reads more weight. True poly(A) junction reads could be accidentally removed by ``polyAfilter.py``. The [samToPolyA.pl](https://github.com/julienlag/samToPolyA/blob/master/samToPolyA.pl) script, which we use to detect poly(A) junction reads, potentially allows distinguishing true poly(A) junctions from genomic A primed reads based on soft-clipping.
 
 | all_filtered_reads | polyA_reads |
 |----------|----------|
@@ -106,13 +106,13 @@ Add gene annotations to peaks. First we need to create an annotation reference f
 ```bash
 bsub < create_turef.lsf 
 ```
-TUs are initially extended by 5kb at the 3' end, and these flank regions will be updated at each peak filtering round to end at the most downstream peaks that overlap with these flanks. We first only retain only peaks that overlap with one TU or its flank.
+TUs are initially extended by 5kb at the 3' end, and these flank regions will be updated at each peak filtering round to end at the most downstream peaks that overlap with these flanks. We first retain only peaks that overlap with one and only one TU or its flank.
 ```bash
 bsub < 3a_assign_tu.lsf
 ``` 
 
-Next, peaks with inferred processing region (PR) length > `maxwidth` bp are filtered out. We then implement a filtering step which retains peaks with at least one poly(A) hexamer signal (`PAS.fa`) within or certain number of bases upstream/downstream (`pr_extn`) from their PR regions and only rescues peaks less than `tes_prox_distance` bases away from an annotated transcription end site. This step is optional because cancer mutations might make the reference genome used for alignments not reliable for PAS hexamer search. For the rest of step 3, users can process peaks with `PAS_filtering` both `false` and `true` and look at how drastically PAS filtering affects peak counts, on top of biological knowledge, to decide if this filtering round is appropriate for their data.
-Lastly, within each set of peaks, per gene read percentage was calculated for each peak, and lowly used peaks (<`min_cov`%) are filtered out. 
+Next, peaks with inferred processing region (PR) length > `maxwidth` bp are filtered out. We then implement a filtering step which retains peaks with at least one poly(A) hexamer signal (`PAS.fa`) within or certain number of bases upstream/downstream (`pr_extn`) from their PR regions and only rescues peaks less than `tes_prox_distance` bases away from an annotated transcription end site. This step is optional because cancer mutations can make the reference genome used for alignments not reliable for PAS hexamer search. For the rest of step 3, users can process peaks with `PAS_filtering` both `false` and `true` and look at how drastically PAS filtering affects peak counts, on top of biological knowledge, to decide if this filtering round is appropriate for their data.
+Lastly, within each prong, per gene read percentage is calculated for each peak, and lowly used peaks (<`min_cov`%) are filtered out. 
 ```bash
 # Argument
 maxwidth=1000
@@ -126,12 +126,12 @@ cores=16 #number of threads for parallel computing
 bsub < 3b_update_peak_ref.lsf
 ``` 
 
-Peaks from two prongs are merged into a final peak reference. Redundancy arising from overlapping between the two peak sets is resolved by prioritizing whichever set with more peaks to achieve a higher resolution of poly(A) sites. Ties are broken by choosing the set with a larger width average or the peaks from the `all_filtered_reads` prong.
+Peaks from two prongs are merged into a final peak reference. Redundancy arising from regions having overlapping between the two peak sets is resolved by prioritizing whichever set with more peaks to achieve a higher resolution of poly(A) sites. Ties are broken by choosing the set with a larger width average or the peaks from the `all_filtered_reads` prong.
 ```bash
 bsub < 3c_merge_two_prongs.lsf
 ``` 
 
-The merged peak reference is now annotated for genomic context. Peaks are classified into five categories, in order of priority to resolve classifications into multiple categories: 3' UTR, TSS-proximal, Exonic, Intronic and Flank. Proximity to a TSS, short for transcriptional start site, of a TU was defined to be less than `dist_pct` of the length of that TU, calculated with its last updated flank region. Here we also identify transcripts that both overlap with multiple exonic peaks and have multiple exons overlapping with those peaks. Out of these transcripts, only those with peak-overlapped exons adding up to `frag_length` bases maximum in length, which should be determined by the average fragment size in the library, and the exonic peaks overlapping with them are inputs for the next peak annotation that identifies and flags fragmented peak, i.e. peaks arising out of spliced alignments.
+The merged peak reference is now annotated for genomic context. Peaks are classified into five categories, in order of priority to resolve classifications into multiple categories: 3' UTR, TSS-proximal, Exonic, Intronic and Flank. Proximity to a TSS, short for transcriptional start site, of a TU is defined to be less than `dist_pct` of the length of that TU, calculated with its last updated flank region. Here we also identify transcripts that both overlap with multiple exonic peaks and have multiple exons overlapping with those peaks. Out of these transcripts, only those with peak-overlapped exons adding up to `frag_length` bases maximum in length, which should be determined by the average fragment size in the library, along with the exonic peaks overlapping with them are inputs for the next peak annotation that identifies and flags fragmented peak, i.e. peaks arising out of spliced alignments.
 ```bash
 # Argument
 PAS_filtering=false
