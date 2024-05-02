@@ -5,7 +5,7 @@ library(ggplot2)
 library(dplyr)
 library(data.table)
 library(BSgenome.Hsapiens.UCSC.hg38)
-#library(BSgenome.Mmusculus.UCSC.mm10)
+library(BSgenome.Mmusculus.UCSC.mm10)
 library(argparser)
 library(parallel)
 

@@ -54,8 +54,8 @@ gap_threshold <- args$gap_threshold %>% as.numeric
 min_cov <- args$min_cov %>% as.numeric
 
 cat('Load and process bedGraph files from both strands \n')
-bg_m_file <- grep('.*minus.*bedGraph',list.files(bg_dir, full.names = TRUE),value=TRUE)
-bg_p_file <- grep('.*plus.*bedGraph',list.files(bg_dir, full.names = TRUE),value=TRUE)
+bg_m_file <- paste0(fprefix,'_realign_merge_candidates_minus.bedGraph')
+bg_p_file <- paste0(fprefix,'_realign_merge_candidates_plus.bedGraph')
 bg_m <- fread(bg_m_file)
 bg_p <- fread(bg_p_file)
 

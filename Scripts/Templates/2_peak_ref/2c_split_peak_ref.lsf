@@ -24,10 +24,13 @@ script_dir=${script_dir}/2_peak_ref/
 chrs=chrsname
 ucsc_utilities_dir=ucscutilitiespath
 
+# Add tool paths to environmental path
+export PATH=${ucsc_utilities_dir}:$PATH
+
 # Argument
 binsize=1
-fragmentsize=200
-extsize=100
+read_extsize=200
+peak_extsize=100
 ncores=16
 
 echo Split multimodal peaks...
@@ -59,8 +62,8 @@ for prong in all_filtered_reads polyA_reads; do
        elif [ $prong == 'polyA_reads' ]; then
           export bam_file=$(ls *${strand}*nowrongstrand.bam)
        fi
-       bamCoverage -b ${bam_file} -o ${bw_dir}${bam_file%.bam}_ext.bw -p $ncores -v --binSize $binsize --extendReads $fragmentsize
-       ${ucsc_utilities_dir}/bigWigToBedGraph ${bw_dir}${bam_file%.bam}_ext.bw ${bg_dir}${bam_file%.bam}.bedGraph
+       bamCoverage -b ${bam_file} -o ${bw_dir}${bam_file%.bam}_ext.bw -p $ncores -v --binSize $binsize --extendReads ${read_extsize}
+       bigWigToBedGraph ${bw_dir}${bam_file%.bam}_ext.bw ${bg_dir}${bam_file%.bam}.bedGraph
        echo Also creating raw big Wig track for ${bam_dir}${bam_file} for track visualization...
        bamCoverage -b ${bam_file} -o ${bw_dir}${bam_file%.bam}_raw.bw -p $ncores -v --binSize $binsize
     done
@@ -72,5 +75,5 @@ for prong in all_filtered_reads polyA_reads; do
     minus_summit=$(ls *minus*peaks.xls) 
     grep -v '^#\|^[[:space:]]*$' ${minus_summit} > ${minus_summit%_peaks.xls}_peaks_summits.txt 
     echo Extending MACS2 peaks by $extsize bp $direction prime then splitting them using gaps and summits...
-    Rscript ${script_dir}2c_split_peaks.R -n $ncores -p $prong -b $bg_dir -s $summit_dir -f $fprefix -o $outdir -e ${direction},${extsize} -c $chrs
+    Rscript ${script_dir}2c_split_peaks.R -n $ncores -p $prong -b $bg_dir -s $summit_dir -f $fprefix -o $outdir -e ${direction},${peak_extsize} -c $chrs
 done

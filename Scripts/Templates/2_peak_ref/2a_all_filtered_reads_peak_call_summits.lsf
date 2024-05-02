@@ -24,7 +24,7 @@ out_dir=${dir}2a_peaks/${prong}/
 
 # Argument
 gsize=hs
-extsize=200
+read_extsize=200
 
 if [ ! -d "$out_dir" ]; then
   mkdir -p $out_dir
@@ -41,7 +41,7 @@ for strand in plus minus; do
         --gsize $gsize \
         --format BAM \
         --nomodel \
-        --extsize $extsize \
+        --extsize ${read_extsize} \
         --outdir ${out_dir} \
         --name ${bam_prefix} \
         -B \

@@ -13,8 +13,6 @@
 #BSUB -N
 
 source activate scPASU_env
-module load bedtools/2.30.0
-module load bowtie2
 
 # Variable
 dir=dirpath
@@ -28,6 +26,11 @@ out=${dir}3h_fragmented_peaks_to_merge/
 bamdir=${dir}1e_merged_bam/
 refdir=${dir}3f_merge_two_prongs/
 ucsc_utilities_dir=ucscutilitiespath
+bedtools_dir=bedtoolspath
+bowtie2_dir=bowtie2path
+
+# Add tool paths to environmental path
+export PATH=${bowtie2_dir}:${bedtools_dir}:${ucsc_utilities_dir}:$PATH
 
 # Argument
 PAS_filtering=false
@@ -106,7 +109,7 @@ for strand in plus minus; do
    bowtie2_prefix=${fprefix}_transcripts_causing_peak_fragmentation_${strand}
    bowtie2-build ${bowtie2_prefix}.fa ${bowtie2_prefix}
    realign_prefix=${fprefix}_realign_merge_candidates_${strand}
-   fastq_file=$(ls *${strand}*fastq)
+   fastq_file=${fprefix}_dedup_uniq_genomicAfiltered_${strand}_subset_spliced_only.fastq
    bowtie2 --local --threads $ncores -x ${bowtie2_prefix} -X 2000 -U ${fastq_file} -S ${realign_prefix}.sam
    
    ### Preparing files for IGV 
@@ -118,7 +121,7 @@ for strand in plus minus; do
 
    ### Call peaks
    bamCoverage -b ${realign_prefix}.sorted.bam -o ${realign_prefix}.bw -p $ncores -v --binSize ${binsize}
-   ${ucsc_utilities_dir}/bigWigToBedGraph ${realign_prefix}.bw ${realign_prefix}.bedGraph
+   bigWigToBedGraph ${realign_prefix}.bw ${realign_prefix}.bedGraph
 done
 
 Rscript ${script_dir}3e_peak_calling_from_bedGraph.R -f $fprefix -b $out -o $out -g $gap_threshold -m $min_coverage

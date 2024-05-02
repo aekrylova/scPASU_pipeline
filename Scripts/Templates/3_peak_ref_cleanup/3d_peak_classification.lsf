@@ -22,7 +22,6 @@ script_dir=scriptpath
 script_dir=${script_dir}/3_peak_ref_cleanup/
 indir=${dir}3f_merge_two_prongs/
 outdir=${dir}3g_peak_classification/
-turef=${indir}genes_flankupdated.rds
 
 # Argument
 PAS_filtering=false
@@ -36,6 +35,7 @@ else
    file_prefix=${compartment}_noPASfiltering
 fi
 
+turef=${indir}${file_prefix}_4thtu_assigned_turef_flankupdated.rds
 ref=${indir}${file_prefix}_4thtu_assigned_peak_universe_updated.txt
 
 echo 'Classify peaks and identify split peaks to merge...'

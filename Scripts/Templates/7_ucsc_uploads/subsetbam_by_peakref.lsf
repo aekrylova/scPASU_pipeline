@@ -20,18 +20,25 @@ fprefix=${compartment}
 dir=dirpath
 outdir=${dir}/${compartment}/
 bam_dir=${outdir}1e_merged_bam/
+PAS_filtering=false
 binsize=1
-bw_dir=${dir}ucsc_tracks/bigwig_tracks/${binsize}bp/
+bw_dir=${outdir}ucsc_tracks/bigwig_tracks/${binsize}bp/
 ncores=36
+
+if [ $PAS_filtering == 'false' ]; then
+   fprefix=${compartment}_noPASfiltering
+fi
+
 cd $bam_dir
 
 for strand in plus minus; do
    bam_file=dedup_uniq_genomicAfiltered_merged_${strand}.bam
    ref=${outdir}3f_merge_two_prongs/${fprefix}_4thtu_assigned_${strand}.bed
-   bam_output=dedup_uniq_genomicAfiltered_${strand}_${compartment}_peakref.bam
+   bam_output=dedup_uniq_genomicAfiltered_${strand}_${fprefix}_peakref.bam
 
    echo Subset ${bam_dir}${bam_file} by $ref
    samtools view -b -h -L $ref $bam_file > $bam_output
+   samtools index $bam_output
 
    echo Create bigwig track
    bamCoverage -b $bam_output -o ${bw_dir}${bam_output%.bam}.bw -p $ncores -v --binSize $binsize

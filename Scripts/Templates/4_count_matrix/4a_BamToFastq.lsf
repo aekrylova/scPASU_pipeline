@@ -24,11 +24,14 @@ bamtofastq_dir=bamtofastqpath
 
 mkdir -p $outdir
 
+# Add tool paths to environmental path
+export PATH=${bamtofastq_dir}:$PATH
+
 # Argument
 ncores=32
 
 echo Convert bam to fastq for $fprefix...
-${bamtofastq_dir}/bamtofastq --nthreads=${ncores} $bamfile ${outdir}${sample}
+bamtofastq --nthreads=${ncores} $bamfile ${outdir}${sample}
 
 fastq_dir=${outdir}${sample}/
 sample_dir=$(ls $fastq_dir | grep ${sample})

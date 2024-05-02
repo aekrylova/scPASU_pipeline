@@ -13,7 +13,6 @@
 #BSUB -N
 
 source activate scPASU_env
-module load bedtools/2.30.0
 
 # Variable
 dir=dirpath
@@ -25,13 +24,17 @@ script_dir=${script_dir}/3_peak_ref_cleanup/
 ref_genome=fastapath
 bam_dir=${dir}1e_merged_bam/
 bam=${bam_dir}dedup_uniq_genomicAfiltered_merged.bam
+chrs=chrsname
+bedtools_dir=bedtoolspath
+
+# Add tool paths to environmental path
+export PATH=${bedtools_dir}:$PATH
 
 # Argument
 maxwidth=1000
 PAS_filtering=false
 pr_extn="5,50"
 tes_prox_distance=100
-chrs=chrsname
 min_cov=10
 cores=16
 
@@ -50,7 +53,7 @@ for prong in all_filtered_reads polyA_reads; do
    Rscript ${script_dir}3b1_filter_by_pr_width.R -r ${ref} -o ${out1} -f ${fprefix1} -m ${maxwidth}
 
    ref1=${out1}${fprefix1}_pr_filtered_peak_ref.txt
-   turef=${ref_dir}genes_flankupdated.rds
+   turef=${ref_dir}${fprefix1}_1sttu_assigned_turef_flankupdated.rds
 
    if [ $PAS_filtering == 'true' ] 
    # 2a. Filter by polyA hexamer signals (PAS.fa) and proximity to annotated transcript ends
@@ -87,7 +90,7 @@ for prong in all_filtered_reads polyA_reads; do
    # 2b. Assign TU - to update peak ref
 
    echo 2nd TU assignment...
-   fprefix2=${fprefix1}_2ndtu_assigned
+   fprefix2=${file_prefix}_${prong}_2ndtu_assigned
    Rscript ${script_dir}3a_assign_tu.R -d ${script_dir} -f ${fprefix2} -o ${out2} -t ${turef} -b ${ref2a} -c $chrs
 
    echo Create bed file for UCSC uploads...
@@ -129,7 +132,7 @@ for prong in all_filtered_reads polyA_reads; do
    echo 3rd TU assignment...
    ref3=${out4}${fprefix1}_cov_filtered_peak_ref.txt
    fprefix3=${fprefix1}_3rdtu_assigned
-   turef=${out2}genes_flankupdated.rds
+   turef=$(ls ${out2}*_2ndtu_assigned_turef_flankupdated.rds)
    Rscript ${script_dir}3a_assign_tu.R -d ${script_dir} -f ${fprefix3} -o ${out4} -t ${turef} -b ${ref3} -c $chrs
 
    # Also create bed file for UCSC uploads

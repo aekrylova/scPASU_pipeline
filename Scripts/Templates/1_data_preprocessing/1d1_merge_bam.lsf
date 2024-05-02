@@ -32,8 +32,6 @@ bam=$(ls --ignore='*.bai' | grep 'filtered')
 
 ## a. Merge  ##
 
-cd ${bam_dir}
-
 echo 'Merging the following bam files:' ${bam}
 samtools merge ${outdir}dedup_uniq_genomicAfiltered_merged.bam ${bam}
 echo 'Indexing the merged bam file...'

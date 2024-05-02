@@ -12,24 +12,35 @@
 #BSUB -B
 #BSUB -N
 
-module load cellranger/7.1.0
-
+# Variable
 dir=dirpath
 compartment=compartmentname
 dir=${dir}${compartment}/
+genome=genomename
 sample=samplename
-ref_dir=${dir}genomename_runname_${compartment}/
-
 fastq_dir=${dir}4a_BamToFastq/${sample}/
 sample_dir=$(ls $fastq_dir | grep $sample)
 fastq_dir=${fastq_dir}${sample_dir} 
 outdir=${dir}4b_cellranger_peakcount/
+cellranger_dir=cellrangerpath
+
+# Add tool paths to environmental path
+export PATH=${cellranger_dir}:$PATH
 
 mkdir -p ${outdir}
 cd ${outdir}
 
 # Argument
-ncores=16
+PAS_filtering=false
+localcores=16
 localmem=200
 
-cellranger count --id $sample --fastqs=${fastq_dir} --sample=${sample} --localcores=16 --localmem=${localmem} --transcriptome=${ref_dir}
+if [ $PAS_filtering == 'true' ]
+   then fprefix=${compartment}
+else
+   fprefix=${compartment}_noPASfiltering
+fi
+genome=${genome}_${fprefix}
+peak_refdir=${dir}${genome}
+
+cellranger count --id $sample --fastqs=${fastq_dir} --sample=${sample} --localcores=${localcores} --localmem=${localmem} --transcriptome=${peak_refdir}

@@ -13,7 +13,6 @@
 #BSUB -N
 
 source activate scPASU_env
-module load bedtools/2.30.0
 
 # Variable
 dir=dirpath
@@ -22,6 +21,10 @@ dir=${dir}${compartment}/
 script_dir=scriptpath
 script_dir=${script_dir}/2_peak_ref/
 chrs=chrsname
+bedtools_dir=bedtoolspath
+
+# Add tool paths to environmental path
+export PATH=${bedtools_dir}:$PATH
 
 # Argument
 all_filtered_reads_min_polya=3

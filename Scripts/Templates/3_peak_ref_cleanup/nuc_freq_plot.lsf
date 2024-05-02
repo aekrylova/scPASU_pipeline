@@ -23,7 +23,7 @@ script_dir=${script_dir}/3_peak_ref_cleanup/
 ref_genome=genomename
 
 # Argument
-PAS_filtering=true
+PAS_filtering=false
 kmer_to_plot=first
 kmer_size=201
 ncore=16

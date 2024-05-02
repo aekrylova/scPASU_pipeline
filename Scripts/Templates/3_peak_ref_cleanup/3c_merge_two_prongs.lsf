@@ -23,7 +23,7 @@ script_dir=${script_dir}/3_peak_ref_cleanup/
 indir=${dir}3e_CovFilter_ref/
 outdir=${dir}3f_merge_two_prongs/
 chrs=chrsname
-turef=${dir}genomename_turef/genes.rds
+turef=${dir}genomename_turef/turef.rds
 
 # Argument
 PAS_filtering=false

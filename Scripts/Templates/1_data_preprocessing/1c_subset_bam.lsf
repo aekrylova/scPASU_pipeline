@@ -27,6 +27,9 @@ bam_output_after_genomicAfiltered=${sample}_dedup_uniq_filtered_${compartment}.b
 subset_dir=${outdir}1d_subset_bam/
 subsetbam_dir=subsetbampath
 
+# Add tool paths to environmental path
+export PATH=${subsetbam_dir}:$PATH
+
 # Argument
 NTHREADS=32
 
@@ -36,11 +39,11 @@ if [ ! -d "$subset_dir" ]; then
 fi
 
 echo Subset-bam for the $compartment compartment before genomicA filtering...
-${subsetbam_dir}/subset-bam -b ${bam_dir_before_genomicAfiltered}${sample}_dedup_uniq.bam -c ${barcode_file} -o ${subset_dir}${bam_output_before_genomicAfiltered} --log-level debug --cores $NTHREADS
+subset-bam -b ${bam_dir_before_genomicAfiltered}${sample}_dedup_uniq.bam -c ${barcode_file} -o ${subset_dir}${bam_output_before_genomicAfiltered} --log-level debug --cores $NTHREADS
 echo 'Indexing the last bam file...'
 samtools index ${subset_dir}${bam_output_before_genomicAfiltered}
 
 echo Subset-bam for the $compartment compartment after genomicA filtering...
-${subsetbam_dir}/subset-bam -b ${bam_dir_after_genomicAfiltered}${sample}_dedup_uniq_filtered_2ndround.bam -c ${barcode_file} -o ${subset_dir}${bam_output_after_genomicAfiltered} ---log-level debug --cores $NTHREADS
+subset-bam -b ${bam_dir_after_genomicAfiltered}${sample}_dedup_uniq_filtered_2ndround.bam -c ${barcode_file} -o ${subset_dir}${bam_output_after_genomicAfiltered} ---log-level debug --cores $NTHREADS
 echo 'Indexing the last bam file...'
 samtools index ${subset_dir}${bam_output_after_genomicAfiltered}

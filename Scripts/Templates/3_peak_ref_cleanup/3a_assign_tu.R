@@ -370,9 +370,9 @@ if (is.na(extn) == FALSE) {
 
 write.table(merged_tu3,paste0(outdir,fprefix,'_peak_universe_updated.txt'),sep='\t',row.names=FALSE,col.names=TRUE,quote=FALSE)
 
-# Modify flank regions of the genes.rds file according to the peaks
+# Modify flank regions of the last TU reference file according to the peaks
 
-red_ens_flank_updated <- update_flank(merged_tu3,red_ens,chrs=chrs)
+red_ens_flank_updated <- update_flank(merged_tu3,red_ens,chrs=chrs,fprefix=fprefix)
 
 # Create SAF format peak ref too
 

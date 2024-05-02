@@ -28,4 +28,4 @@ flank=5000
 final_annotation=gene_symbol
 
 echo 'Assigning TU to peaks...'
-Rscript ${script_dir}create_turef.R -d ${script_dir} -g ${GTF} -o ${outdir} -f $flank -a $gene_symbol
+Rscript ${script_dir}create_turef.R -d ${script_dir} -g ${GTF} -o ${outdir} -f $flank -a $final_annotation

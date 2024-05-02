@@ -21,7 +21,7 @@ dir=${dir}${compartment}/
 file_prefix=${compartment}
 script_dir=scriptpath
 script_dir=${script_dir}/3_peak_ref_cleanup/
-turef=${dir}genomename_turef/genes.rds
+turef=${dir}genomename_turef/turef.rds
 chrs=chrsname
 
 echo Assigning TU to peaks...

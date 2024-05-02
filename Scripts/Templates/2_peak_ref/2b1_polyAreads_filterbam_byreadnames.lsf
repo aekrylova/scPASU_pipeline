@@ -13,7 +13,6 @@
 #BSUB -N
 
 source activate scPASU_env
-module load picard
 
 # Variable
 dir=dirpath
@@ -23,6 +22,7 @@ input_bam_dir=${dir}1e_merged_bam/
 polya_dir=${dir}2b_polya/before_genomicAfiltering/
 readname_dir=${polya_dir}read_names/
 output_bam_dir=${polya_dir}bam_files/
+PICARD_PATH=picardpath
 
 if [ ! -d "$readname_dir" ]; then mkdir -p $readname_dir; fi
 if [ ! -d "$output_bam_dir" ]; then mkdir -p $output_bam_dir; fi

@@ -6,7 +6,7 @@ library(stringr)
 library(ggplot2)
 library(reshape)
 library(matrixStats)
-library(edgeR)
+#library(edgeR)
 library(DEXSeq)
 library(GenomicRanges)
 library(goldmine)
@@ -708,7 +708,7 @@ create_TU_from_gtf <- function(genes,flank=5000,outdir='./',use.genesymbol=FALSE
   if (tu.create.only) {
     cat('Do not annotate TU \n')
     ret <- list(tu = tu, genes.tu = genes.tu)
-    if(save) {saveRDS(ret,paste0(outdir,'genes.rds'))}
+    if(save) {saveRDS(ret,paste0(outdir,'turef.rds'))}
     return(ret)
   }
   
@@ -819,7 +819,7 @@ create_TU_from_gtf <- function(genes,flank=5000,outdir='./',use.genesymbol=FALSE
   
   ret <- list(tu=tu,genes.tu=genes.tu,flank=tu.flank,utr3=utr3,between=btw,internal=internal,noutr3=noutr) # Summarize the steps that lead to tu, genes.tu, tu.flank, utr3, btw, internal and noutr
   
-  if(save) {saveRDS(ret,paste0(outdir,'genes.rds'))}
+  if(save) {saveRDS(ret,paste0(outdir,'turef.rds'))}
   
   return(ret)
 }
@@ -827,7 +827,8 @@ create_TU_from_gtf <- function(genes,flank=5000,outdir='./',use.genesymbol=FALSE
 update_flank <- function(peaks_annot,genes, save=TRUE, 
                          chrs = c('chr1','chr2','chr3','chr4','chr5','chr6','chr7','chr8','chr9','chr10',
                                   'chr11','chr12','chr13','chr14','chr15','chr16','chr17','chr18','chr19',
-                                  'chr20','chr21','chr22','chrX','chrY')) {
+                                  'chr20','chr21','chr22','chrX','chrY'),
+                         fprefix = fprefix) {
   cat('Modify the flank regions so that it ends at the most downstream peak. If no peaks are found within the flank regions and the no peak overfloods the TU border, the regions are deleted.\n')
   tu <- as.data.frame(genes$tu)
   peaks_annot$tu_start <- tu$start[match(peaks_annot$tu,tu$tu)]
@@ -879,7 +880,7 @@ update_flank <- function(peaks_annot,genes, save=TRUE,
   seqlevels(tu_flanks_updated) <- chrs
   genes$flank <- tu_flanks_updated
   
-  if(save) {saveRDS(genes,paste0(outdir,'genes_flankupdated.rds'))}
+  if(save) {saveRDS(genes,paste0(outdir,fprefix,'_turef_flankupdated.rds'))}
   
   return(genes)
 }
