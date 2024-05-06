@@ -13,7 +13,6 @@
 #BSUB -N
 
 source activate scPASU_env
-module load perl/5.22.1
 
 # Variable
 dir=dirpath
