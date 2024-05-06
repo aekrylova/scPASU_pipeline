@@ -25,14 +25,14 @@ Install the following:
 * [umi-tools](https://umi-tools.readthedocs.io/en/latest/INSTALL.html)
 * [samtools](https://anaconda.org/bioconda/samtools)
 * [subset-bam](https://github.com/10XGenomics/subset-bam)
-* [perl](https://www.perl.org/get.html)
-    * Required modules: `strict`, `warnings`, `Getopt::Long`, `Pod::Usage` and `Bio::DB::Fasta`
+* [bioperl](https://anaconda.org/bioconda/perl-bioperl)
+    * If [perl](https://www.perl.org/get.html), make sure to install `strict`, `warnings`, `Getopt::Long`, `Pod::Usage` and `Bio::DB::Fasta`
 * [picard](https://broadinstitute.github.io/picard/)
 * [MACS2](https://pypi.org/project/MACS2/)
 * [deeptools](https://deeptools.readthedocs.io/en/develop/content/installation.html)
 * [bedtools](https://bedtools.readthedocs.io/en/latest/content/installation.html)
 * [bowtie2](https://www.metagenomics.wiki/tools/bowtie2/install)
-* [UCSC utilities](https://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64.v369/): `bigWigToBedGraph`,`bedToBigBed`
+* [UCSC utilities](https://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64.v369/): `bigWigToBedGraph`,`bedToBigBed`,`bedGraphToBigWig`
 * [bamtofastq](https://github.com/10XGenomics/bamtofastq/releases)
 * [cellranger](https://www.10xgenomics.com/support/software/cell-ranger/latest/tutorials/cr-tutorial-in)
 
