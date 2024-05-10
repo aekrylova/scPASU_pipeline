@@ -61,9 +61,10 @@ bg_p <- fread(bg_p_file)
 
 bg_m$strand <- '-'
 bg_p$strand <- '+'
+colnames(bg_p) <- c('chr','start','end','score','strand')
+colnames(bg_m) <- c('chr','start','end','score','strand')
 bg <- rbind(bg_p,bg_m)
 
-colnames(bg) <- c('chr','start','end','score','strand')
 transcripts <- bg$chr %>% unique
 
 cat('Obtain peaks, i.e. contiguous regions with components larger than gap_threshold, from bedGraph files \n')

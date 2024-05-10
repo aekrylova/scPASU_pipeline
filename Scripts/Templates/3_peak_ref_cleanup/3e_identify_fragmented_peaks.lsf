@@ -4,36 +4,33 @@
 #BSUB -n 32
 #BSUB -M 64
 #BSUB -R rusage[mem=64]
-#BSUB -o /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/output/runname_compartmentname_3e_identify_fragmented_peaks.%J.out
-#BSUB -e /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/error/runname_compartmentname_3e_identify_fragmented_peaks.%J.err
+#BSUB -o /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/output/test_3e_identify_fragmented_peaks.%J.out
+#BSUB -e /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/error/test_3e_identify_fragmented_peaks.%J.err
 #BSUB -q e40medium
-#BSUB -J runname_compartmentname_3e_identify_fragmented_peaks
+#BSUB -J test_3e_identify_fragmented_peaks
 #BSUB -u bnle@mdanderson.org
 #BSUB -B
 #BSUB -N
 
 source activate scPASU_env
+module load bedtools/2.30.0
+module load bowtie2
 
 # Variable
-dir=dirpath
-compartment=compartmentname
+dir=/rsrch6/scratch/mol_cgenesis/bnle/test_scPASU_run/outputs/
+compartment=immune
 dir=${dir}${compartment}/
-script_dir=scriptpath
+script_dir=/rsrch6/scratch/mol_cgenesis/bnle/test_scPASU_run/Scripts/immune
 script_dir=${script_dir}/3_peak_ref_cleanup/
-ref_genome=fastapath
+ref_genome=/rsrch6/scratch/mol_cgenesis/bnle/GRCh38/fasta/genome.fa
 in=${dir}3g_peak_classification/
 out=${dir}3h_fragmented_peaks_to_merge/
 bamdir=${dir}1e_merged_bam/
 refdir=${dir}3f_merge_two_prongs/
-ucsc_utilities_dir=ucscutilitiespath
-bedtools_dir=bedtoolspath
-bowtie2_dir=bowtie2path
-
-# Add tool paths to environmental path
-export PATH=${bowtie2_dir}:${bedtools_dir}:${ucsc_utilities_dir}:$PATH
+ucsc_utilities_dir=/rsrch6/scratch/mol_cgenesis/bnle/
 
 # Argument
-PAS_filtering=false
+PAS_filtering=true
 binsize=1
 gap_threshold=0
 min_coverage=10
@@ -49,10 +46,30 @@ fi
 
 peak_saf=${refdir}${fprefix}_4thtu_assigned_peak_universe_updated.saf
 
+# Functions
+check_empty_files() {
+    local files=("$@")
+    local is_empty=1
+
+    for file in "${files[@]}"; do
+        if [ ! -s "$file" ]; then
+            is_empty=0
+            break
+        fi
+    done
+
+    return $is_empty
+}
+
 mkdir -p ${out}
 
-echo Extract transcripts likely causing peak fragmentation...
 transcripts=${in}${fprefix}_transcripts_causing_peak_fragmentation.txt
+if [ $(tail -n+2 $transcripts | wc -l) -eq 0 ]; then
+    echo "There are no transcripts likely causing fragmentation. Exiting script."
+    exit 1
+fi
+echo Extract transcripts likely causing peak fragmentation...
+
 for strand in plus minus; do
    bed_input=${out}${fprefix}_transcripts_causing_peak_fragmentation_exons_${strand}.bed
    fa_output=${out}${fprefix}_transcripts_causing_peak_fragmentation_exons_${strand}.fa
@@ -107,21 +124,26 @@ echo Call peaks on the realignment of spliced reads from merge candidates agains
 for strand in plus minus; do
    ### Realign spliced reads from merge candidates against transcripts likely causing peak fragmentation
    bowtie2_prefix=${fprefix}_transcripts_causing_peak_fragmentation_${strand}
-   bowtie2-build ${bowtie2_prefix}.fa ${bowtie2_prefix}
    realign_prefix=${fprefix}_realign_merge_candidates_${strand}
-   fastq_file=${fprefix}_dedup_uniq_genomicAfiltered_${strand}_subset_spliced_only.fastq
-   bowtie2 --local --threads $ncores -x ${bowtie2_prefix} -X 2000 -U ${fastq_file} -S ${realign_prefix}.sam
    
-   ### Preparing files for IGV 
-   samtools faidx ${bowtie2_prefix}.fa
-   samtools view -bS ${realign_prefix}.sam > ${realign_prefix}.bam
-   samtools sort ${realign_prefix}.bam -@ $ncores -o ${realign_prefix}.sorted.bam > ${realign_prefix}.sorted.bam
-   samtools index ${realign_prefix}.sorted.bam
-   rm ${realign_prefix}.bam ${realign_prefix}.sam
+   if ! check_empty_files ${bowtie2_prefix}.fa; then
+       bowtie2-build ${bowtie2_prefix}.fa ${bowtie2_prefix}
+       fastq_file=${fprefix}_dedup_uniq_genomicAfiltered_${strand}_subset_spliced_only.fastq
+       bowtie2 --local --threads $ncores -x ${bowtie2_prefix} -X 2000 -U ${fastq_file} -S ${realign_prefix}.sam
+   
+       ### Preparing files for IGV 
+       samtools faidx ${bowtie2_prefix}.fa
+       samtools view -bS ${realign_prefix}.sam > ${realign_prefix}.bam
+       samtools sort ${realign_prefix}.bam -@ $ncores -o ${realign_prefix}.sorted.bam > ${realign_prefix}.sorted.bam
+       samtools index ${realign_prefix}.sorted.bam
+       rm ${realign_prefix}.bam ${realign_prefix}.sam
 
-   ### Call peaks
-   bamCoverage -b ${realign_prefix}.sorted.bam -o ${realign_prefix}.bw -p $ncores -v --binSize ${binsize}
-   bigWigToBedGraph ${realign_prefix}.bw ${realign_prefix}.bedGraph
+       ### Call peaks
+       bamCoverage -b ${realign_prefix}.sorted.bam -o ${realign_prefix}.bw -p $ncores -v --binSize ${binsize}
+       ${ucsc_utilities_dir}/bigWigToBedGraph ${realign_prefix}.bw ${realign_prefix}.bedGraph
+   else
+      echo chr$'\t'start$'\t'end$'\t'score > ${realign_prefix}.bedGraph
+   fi 
 done
 
 Rscript ${script_dir}3e_peak_calling_from_bedGraph.R -f $fprefix -b $out -o $out -g $gap_threshold -m $min_coverage

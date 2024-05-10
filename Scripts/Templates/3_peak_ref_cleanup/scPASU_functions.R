@@ -228,37 +228,39 @@ joinTus_peaks<- function(allpeaks,rg)
 
 create_final_annotation_col<-function(mtu, is_minus=FALSE)
 {
-  # sort
-  mtu<-mtu[mixedorder(mtu$tu),]
-  
-  # Sort minus strand differently for correct annotation
-  if(is_minus==TRUE)
-  {
-    mtu<-dplyr::arrange(mtu,chr,desc(start))
+  if (nrow(mtu)==0) {mtu$final_annotation <- c()
+  } else {
+    # sort
+    mtu<-mtu[mixedorder(mtu$tu),]
+   
+    # Sort minus strand differently for correct annotation
+    if(is_minus==TRUE)
+    {
+      mtu<-dplyr::arrange(mtu,chr,desc(start))
+    }
+   
+    tu<-unique(mtu$tu)
+    cnt<-mtu %>% group_by(tu) %>% tally()
+    cnt<-cnt[order(cnt$n),]
+   
+    mtu$final_annotation<-rep('none',nrow(mtu))
+   
+    for(i in 1:length(tu))
+    {
+      indx<-match(tu[i],cnt$tu)
+     
+      n<-cnt$n[indx]
+      p<-paste0('P',(1:n))
+      indx2<-which(mtu$tu %in% tu[i])
+      new_anno<-paste0(mtu$tu[indx2],':',mtu$gene[indx2],':',p)
+      mtu$final_annotation[indx2]<-new_anno
+     
+    }
   }
-  
-  tu<-unique(mtu$tu)
-  cnt<-mtu %>% group_by(tu) %>% tally()
-  cnt<-cnt[order(cnt$n),]
-  
-  mtu$final_annotation<-rep('none',nrow(mtu))
-  
-  for(i in 1:length(tu))
-  {
-    
-    indx<-match(tu[i],cnt$tu)
-    
-    n<-cnt$n[indx]
-    p<-paste0('P',(1:n))
-    indx2<-which(mtu$tu %in% tu[i])
-    new_anno<-paste0(mtu$tu[indx2],':',mtu$gene[indx2],':',p)
-    mtu$final_annotation[indx2]<-new_anno
-    
-  }
+ 
   return(mtu)
-  
+ 
 }
-
 
 get_histogram<-function(dat,binw,col='royal blue',fill='salmon', x_lim='none',y_lim='none',title,x_lab)
 {
