@@ -4,7 +4,7 @@ Alternative Polyadenylation (APA) analysis utilizes 3' end sequencing data. Inte
 
 ## Installation
 
-Create a conda environment.
+Create a conda environment. It is recommended that you install this new, faster dependency [solver](https://www.anaconda.com/blog/a-faster-conda-for-a-growing-community) first.
 ```bash
 conda create --name scPASU_env python=3.10
 conda activate scPASU_env
@@ -19,6 +19,11 @@ install.packages(R_libs)
 Bioconductor_R_libs <- c('GenomicRanges','rtracklayer','Biostrings','Rsubread','DEXSeq','apeglm','DESeq2','BSgenome.Hsapiens.UCSC.hg38','BSgenome.Mmusculus.UCSC.mm10')
 BiocManager::install(Bioconductor_R_libs)
 devtools::install_github("jeffbhasin/goldmine")
+```
+If you can't install any of the R libraries from R, try doing so with conda. For example:
+```bash
+conda install conda-forge::r-factoextra
+conda install conda-forge::r-devtools
 ```
 Install the following:
 * [polyAfilter](https://github.com/MarekSvob/polyAfilter)
