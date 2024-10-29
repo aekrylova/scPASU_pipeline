@@ -182,12 +182,12 @@ find_motif_cluster <- function(meme,phastcon30way_perbin,motif_cluster,full.only
 }
 
 # Variables
-setwd('~/Desktop/Ureter10_scPASU_run/outputs/urothelial/5b_APA_testing/differentiation_stage_cellranger_peakcount/meme_motif_results/')
+setwd('~/Desktop/Research/scPASU_pipeline_runs/Ureter10_scPASU_run/outputs/differentiation_stage_cellranger_peakcount/meme_motif_results/')
 shortening <- readRDS('WUI_APA_genes_UTR3_shortening_ranges_phastcon30way_perbin.rds')
 lengthening <- readRDS('WUI_APA_genes_UTR3_lengthening_ranges_phastcon30way_perbin.rds')
-wd <- '~/Desktop/Ureter10_scPASU_run/outputs/urothelial/5b_APA_testing/differentiation_stage_cellranger_peakcount/'
+wd <- '~/Desktop/Research/scPASU_pipeline_runs/Ureter10_scPASU_run/outputs/differentiation_stage_cellranger_peakcount/'
 meme_dir <- paste0(wd,'meme_motif_results/')
-#fprefix <- 'WUI_APA_genes_UTR3_shortening_ranges'
+fprefix <- 'WUI_APA_genes_UTR3_shortening_ranges'
 fprefix <- 'WUI_APA_genes_UTR3_lengthening_ranges'
 num_motif <- 5
 
@@ -306,44 +306,120 @@ table(plot_data$annot)
 plot_data$annot <- str_replace_all(plot_data$annot,c("avg_motif_phastcon30score"="Motif",
                                   "avg_motifcluster_phastcon30score"="Motif Cluster",
                                   "avg_nomotif_phastcon30score"="No Motif"))
+# Exclude Motif Cluster genes from Motif
+plot_data <- plot_data[-which(plot_data$seq_name %in% plot_data$seq_name[plot_data$annot=='Motif Cluster'] & plot_data$annot == 'Motif'),]
+table(plot_data$annot)
+## Shortening
+# Motif Motif Cluster      No Motif 
+# 50            29            79 
+## Lengthening
+# Motif Motif Cluster      No Motif 
+# 34            30            64 
 
-p1 <- ggplot(plot_data, aes(x=annot, y=value)) + geom_boxplot() + 
-  geom_jitter(shape=16, position=position_jitter(0.2,seed = 123))
+p1 <- ggplot(plot_data, aes(x=annot, y=value)) + geom_boxplot(outlier.size = 3, linewidth = 1) + 
+  geom_jitter(size = 3, position=position_jitter(0.2,seed = 123))
 p1 + labs(y= "Average PhastCons30 Score") +
   theme(axis.text.x = element_text(colour = "black", size = 14),
         axis.title.x = element_blank(),
         axis.title.y = element_text(size = 14),
         axis.text.y = element_text(colour = "black", size = 14), 
-        panel.background = element_blank(), panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5))
+        panel.background = element_blank(), panel.border = element_rect(colour = "black", fill = NA, linewidth = 1))
+
+ggsave('lengthening_avgphastconscores_motifnotincludemc.png', width = 8, height = 8, units = 'in')
+ggsave('shortening_avgphastconscores_motifnotincludemc.png', width = 8, height = 8, units = 'in')
 
 p1 + theme(axis.text = element_blank(),
            axis.title = element_blank(),
-           panel.background = element_blank(), panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5))
+           panel.background = element_blank(), panel.border = element_rect(colour = "black", fill = NA, linewidth = 1))
 
-ggsave('lengthening/lengthening_avgphastconscores_nolab.png', width = 8, height = 8, units = 'in')
+ggsave('lengthening_avgphastconscores_motifnotincludemc_nolab.png', width = 8, height = 8, units = 'in')
+ggsave('shortening_avgphastconscores_motifnotincludemc_nolab.png', width = 8, height = 8, units = 'in')
 
+### Testing
+test_combn <- combn(unique(plot_data$annot),2)
+for (i in 1:ncol(test_combn)) {
+  print(test_combn[,i])
+  data1 <- subset(plot_data, annot %in% test_combn[1,i])
+  data2 <- subset(plot_data, annot %in% test_combn[2,i])
+  res <- wilcox.test(data1$value, data2$value)
+  print(res)
+  rm(res,data1,data2,i)
+}
+### Shortening
+## Include motif cluster genes in 'Motif'
+# [1] "Motif"    "No Motif"
+# Wilcoxon rank sum test with continuity correction
+# data:  data1$value and data2$value
+# W = 1173, p-value = 1.282e-11
+# alternative hypothesis: true location shift is not equal to 0
 
-#### Archive
-plot_data <- rbind(plot_data_all_motifs,plot_data_motif_clusters)
-plot_data <- plot_data[which(plot_data$annot %in% c('phastcon30score_ratio_allmotifs',
-                                                    'phastcon30score_ratio_cluster')),]
-table(plot_data$annot)
-# phastcon30score_ratio_allmotifs   phastcon30score_ratio_cluster 
-# 79                              29
-# phastcon30score_ratio_allmotifs   phastcon30score_ratio_cluster 
-# 64                              30 
-plot_data$annot <- ifelse(plot_data$annot == "phastcon30score_ratio_cluster" & plot_data$full_or_partial == TRUE,
-                          'phastcon30score_ratio_fullcluster',plot_data$annot)
+# [1] "Motif"         "Motif Cluster"
+# Wilcoxon rank sum test with continuity correction
+# data:  data1$value and data2$value
+# W = 1123, p-value = 0.8788
+# alternative hypothesis: true location shift is not equal to 0
 
-plot_data$annot[which(plot_data$annot == 'phastcon30score_ratio_cluster')] <- 'phastcon30score_ratio_partialcluster'
-table(plot_data$annot)
-# phastcon30score_ratio_allmotifs    phastcon30score_ratio_fullcluster phastcon30score_ratio_partialcluster 
-# 79                                   16                                   13
-# phastcon30score_ratio_allmotifs    phastcon30score_ratio_fullcluster phastcon30score_ratio_partialcluster 
-# 64                                   12                                   18
-p2 <- ggplot(plot_data, aes(x=annot, y=value)) + geom_violin() + geom_boxplot(width=0.1)
-p2
+# [1] "No Motif"      "Motif Cluster"
+# Wilcoxon rank sum test with continuity correction
+# data:  data1$value and data2$value
+# W = 1920, p-value = 8.075e-08
+# alternative hypothesis: true location shift is not equal to 0
 
-ggsave('lengthening/lengthening_avgphastconscore_ratios.png', width = 8, height = 8, units = 'in', p2)
+## Do not include motif cluster genes in 'Motif'
+# [1] "Motif"    "No Motif"
+# Wilcoxon rank sum test with continuity correction
+# data:  data1$value and data2$value
+# W = 837, p-value = 3.823e-08
+# alternative hypothesis: true location shift is not equal to 0
 
+# [1] "Motif"         "Motif Cluster"
+# Wilcoxon rank sum test with continuity correction
+# data:  data1$value and data2$value
+# W = 744, p-value = 0.8507
+# alternative hypothesis: true location shift is not equal to 0
+
+# [1] "No Motif"      "Motif Cluster"
+# Wilcoxon rank sum test with continuity correction
+# data:  data1$value and data2$value
+# W = 1920, p-value = 8.075e-08
+# alternative hypothesis: true location shift is not equal to 0
+
+### Lengthening
+## Include motif cluster genes in 'Motif'
+# [1] "Motif"    "No Motif"
+# Wilcoxon rank sum test with continuity correction
+# data:  data1$value and data2$value
+# W = 403, p-value = 4.614e-15
+# alternative hypothesis: true location shift is not equal to 0
+
+# [1] "Motif"         "Motif Cluster"
+# Wilcoxon rank sum test with continuity correction
+# data:  data1$value and data2$value
+# W = 764, p-value = 0.1128
+# alternative hypothesis: true location shift is not equal to 0
+
+# [1] "No Motif"      "Motif Cluster"
+# Wilcoxon rank sum test with continuity correction
+# data:  data1$value and data2$value
+# W = 1692, p-value = 2.97e-09
+# alternative hypothesis: true location shift is not equal to 0
+
+## Include motif cluster genes in 'Motif'
+# [1] "No Motif" "Motif"   
+# Wilcoxon rank sum test with continuity correction
+# data:  data1$value and data2$value
+# W = 1971, p-value = 4.502e-11
+# alternative hypothesis: true location shift is not equal to 0
+
+# [1] "No Motif"      "Motif Cluster"
+# Wilcoxon rank sum test with continuity correction
+# data:  data1$value and data2$value
+# W = 1692, p-value = 2.97e-09
+# alternative hypothesis: true location shift is not equal to 0
+
+# [1] "Motif"         "Motif Cluster"
+# Wilcoxon rank sum exact test
+# data:  data1$value and data2$value
+# W = 305, p-value = 0.005382
+# alternative hypothesis: true location shift is not equal to 0
 
