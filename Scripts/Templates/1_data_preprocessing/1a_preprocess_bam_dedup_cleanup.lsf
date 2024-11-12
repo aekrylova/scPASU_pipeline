@@ -4,10 +4,10 @@
 #BSUB -n 32
 #BSUB -M 200
 #BSUB -R rusage[mem=200]
-#BSUB -o /home/bnle/bsub_jobs/output/runname_1b_preprocess_bam_dedup_cleanup_samplename.%J.out
-#BSUB -e /home/bnle/bsub_jobs/error/runname_1b_preprocess_bam_dedup_cleanup_samplename.%J.err
+#BSUB -o /home/bnle/bsub_jobs/output/runname_1a_preprocess_bam_dedup_cleanup_samplename.%J.out
+#BSUB -e /home/bnle/bsub_jobs/error/runname_1a_preprocess_bam_dedup_cleanup_samplename.%J.err
 #BSUB -q e40medium
-#BSUB -J runname_1b_preprocess_bam_dedup_cleanup_samplename
+#BSUB -J runname_1a_preprocess_bam_dedup_cleanup_samplename
 #BSUB -u bnle@mdanderson.org
 #BSUB -B
 #BSUB -N
@@ -19,8 +19,8 @@ sample=samplename
 cellranger_dir=cellrangeroutputpath
 bam_file=${cellranger_dir}/${sample}/outs/possorted_genome_bam.bam
 dir=dirpath
-dedup_dir=${dir}/1a_dedup_bam/
-clean_bam_dir=${dir}/1b_clean_bam/
+dedup_dir=${dir}/1a1_dedup_bam/
+clean_bam_dir=${dir}/1a2_clean_bam/
 
 mkdir -p ${dedup_dir} ${clean_bam_dir}
 
