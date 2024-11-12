@@ -4,10 +4,10 @@
 #BSUB -n 32
 #BSUB -M 300
 #BSUB -R rusage[mem=300]
-#BSUB -o /home/bnle/bsub_jobs/output/runname_1b_preprocess_bam_genomicA_filtering_1stround_samplename.%J.out
-#BSUB -e /home/bnle/bsub_jobs/error/runname_1b_preprocess_bam_genomicA_filtering_1stround_samplename.%J.err
+#BSUB -o /home/bnle/bsub_jobs/output/runname_1b1_genomicA_filtering_1stround_samplename.%J.out
+#BSUB -e /home/bnle/bsub_jobs/error/runname_1b1_genomicA_filtering_1stround_samplename.%J.err
 #BSUB -q e40medium
-#BSUB -J runname_1b_preprocess_bam_genomicA_filtering_1stround_samplename
+#BSUB -J runname_1b1_genomicA_filtering_1stround_samplename
 #BSUB -u bnle@mdanderson.org
 #BSUB -B
 #BSUB -N
@@ -16,8 +16,8 @@ source activate scPASU_env
 
 # Variable
 dir=dirpath
-clean_bam_dir=${dir}/1b_clean_bam/
-filter_dir=${dir}/1c_filtered_bam/
+clean_bam_dir=${dir}/1a2_clean_bam/
+filter_dir=${dir}/1b_filtered_bam/
 sample=samplename
 WORKING_DIR=polyAfilterpath
 FASTA=fastapath
