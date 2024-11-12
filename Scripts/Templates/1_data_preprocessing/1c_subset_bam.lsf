@@ -4,10 +4,10 @@
 #BSUB -n 16
 #BSUB -M 20
 #BSUB -R rusage[mem=20]
-#BSUB -o /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/output/runname_subset_compartmentname_samplename.%J.out
-#BSUB -e /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/error/runname_subset_compartmentname_samplename.%J.err
+#BSUB -o /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/output/runname_1c_subset_compartmentname_samplename.%J.out
+#BSUB -e /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/error/runname_1c_subset_compartmentname_samplename.%J.err
 #BSUB -q medium
-#BSUB -J runname_subset_compartmentname_samplename
+#BSUB -J runname_1c_subset_compartmentname_samplename
 #BSUB -u bnle@mdanderson.org
 #BSUB -B
 #BSUB -N
@@ -20,11 +20,11 @@ compartment=compartmentname
 outdir=${dir}${compartment}/
 sample=samplename
 barcode_file=${outdir}/barcode/${sample}_${compartment}_barcodes.tsv
-bam_dir_before_genomicAfiltered=${dir}1b_clean_bam/
-bam_dir_after_genomicAfiltered=${dir}1c_filtered_bam/
+bam_dir_before_genomicAfiltered=${dir}1a2_clean_bam/
+bam_dir_after_genomicAfiltered=${dir}1b_filtered_bam/
 bam_output_before_genomicAfiltered=${sample}_dedup_uniq_${compartment}.bam
 bam_output_after_genomicAfiltered=${sample}_dedup_uniq_filtered_${compartment}.bam
-subset_dir=${outdir}1d_subset_bam/
+subset_dir=${outdir}1c_subset_bam/
 subsetbam_dir=subsetbampath
 
 # Add tool paths to environmental path
