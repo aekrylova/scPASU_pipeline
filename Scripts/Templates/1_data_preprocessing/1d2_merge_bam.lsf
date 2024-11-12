@@ -4,10 +4,10 @@
 #BSUB -n 16
 #BSUB -M 16
 #BSUB -R rusage[mem=16]
-#BSUB -o /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/output/runname_compartmentname_merge_bam_beforegenomicAfiltering.%J.out
-#BSUB -e /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/error/runname_compartmentname_merge_bam_beforegenomicAfiltering.%J.err
+#BSUB -o /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/output/runname_1d2_compartmentname_merge_bam_beforegenomicAfiltering.%J.out
+#BSUB -e /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/error/runname_1d2_compartmentname_merge_bam_beforegenomicAfiltering.%J.err
 #BSUB -q long
-#BSUB -J runname_compartmentname_merge_bam_beforegenomicAfiltering
+#BSUB -J runname_1d2_compartmentname_merge_bam_beforegenomicAfiltering
 #BSUB -u bnle@mdanderson.org
 #BSUB -B
 #BSUB -N
@@ -18,8 +18,8 @@ source activate scPASU_env
 dir=dirpath
 compartment=compartmentname
 outdir=${dir}${compartment}/
-bam_dir=${outdir}1d_subset_bam/
-outdir=${outdir}1e_merged_bam/
+bam_dir=${outdir}1c_subset_bam/
+outdir=${outdir}1d_merged_bam/
 
 if [ ! -d "$outdir" ]; then
   mkdir -p $outdir
