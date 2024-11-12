@@ -18,7 +18,7 @@ source activate scPASU_env
 WORKING_DIR=polyAfilterpath
 GTF=gtfpath
 dir=dirpath
-filter_dir=${dir}/1c_filtered_bam/
+filter_dir=${dir}/1b_filtered_bam/
 DB=${filter_dir}gtfdb.db
 
 mkdir -p ${filter_dir}
