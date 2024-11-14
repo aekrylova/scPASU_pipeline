@@ -21,7 +21,7 @@ dir=${dir}${compartment}/
 script_dir=scriptpath
 script_dir=${script_dir}/3_peak_ref_cleanup/
 indir=${dir}3b4_filtered_by_peak_coverage/
-outdir=${dir}3c_merge_two_prongs/
+outdir=${dir}3c_merged_prongs/
 chrs=chrsname
 turef=${dir}genomename_turef/turef.rds
 
