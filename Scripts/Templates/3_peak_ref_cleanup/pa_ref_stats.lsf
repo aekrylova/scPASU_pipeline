@@ -36,7 +36,7 @@ if test -f $refstats; then echo Delete the existing $(basename "$refstats"); rm 
 
 echo 'Strand'$'\t''Plus'$'\t''Minus'$'\t''Both' > $refstats
 
-bam_dir=${dir}1e_merged_bam/
+bam_dir=${dir}1d_merged_bam/
 for strand in plus minus; do
     export bam_file=$(ls ${bam_dir}*${strand}.bam | grep -v 'genomicAfiltered')
     export bam_stats=${bam_file%.bam}.stats.txt
@@ -53,7 +53,7 @@ for prong in all_filtered_reads polyA_reads; do
    echo $prong >> $refstats
    for strand in plus minus; do
        if [ $prong == 'all_filtered_reads' ]; then
-           export bam_dir=${dir}1e_merged_bam/
+           export bam_dir=${dir}1d_merged_bam/
            export bam_file=$(ls ${bam_dir}dedup_uniq_genomicAfiltered_merged_${strand}.bam)
            export polyA_dir=${dir}2b_polya/after_genomicAfiltering/
        elif [ $prong == 'polyA_reads' ]; then
@@ -95,8 +95,8 @@ for prong in all_filtered_reads polyA_reads; do
    
    echo 'Number of MACS2 peaks:'$'\t'${num_plus_peaks}$'\t'${num_minus_peaks}$'\t'$((num_plus_peaks+num_minus_peaks)) >> $refstats
    
-   num_plus_peaks_aftersplitting=$(cat ${dir}2d_split_peaks/${prong}/*plus_peaks.narrowPeak | wc -l)
-   num_minus_peaks_aftersplitting=$(cat ${dir}2d_split_peaks/${prong}/*minus_peaks.narrowPeak | wc -l) 
+   num_plus_peaks_aftersplitting=$(cat ${dir}2c2_split_peaks/${prong}/*plus_peaks.narrowPeak | wc -l)
+   num_minus_peaks_aftersplitting=$(cat ${dir}2c2_split_peaks/${prong}/*minus_peaks.narrowPeak | wc -l) 
    echo 'Number of MACS2 peaks after splitting:'$'\t'${num_plus_peaks_aftersplitting}$'\t'${num_minus_peaks_aftersplitting}$'\t'$((num_plus_peaks_aftersplitting+num_minus_peaks_aftersplitting)) >> $refstats
    
    num_plus_polyA_peaks=$(cut -f5 ${dir}3a_1st_assign_tu/${prong}/*_peak_universe.txt | tail -n+2 | grep -w '+' | wc -l)
@@ -107,17 +107,17 @@ for prong in all_filtered_reads polyA_reads; do
    num_minus_TUassigned_peaks=$(cat ${dir}3a_1st_assign_tu/${prong}/*_minus.bed | wc -l)
    echo 'Number of TU-assigned peaks:'$'\t'${num_plus_TUassigned_peaks}$'\t'${num_minus_TUassigned_peaks}$'\t'$((num_plus_TUassigned_peaks+num_minus_TUassigned_peaks)) >> $refstats
    
-   num_plus_PRfiltered_peaks=$(cat ${dir}3b_Filter_by_PR_width/${prong}/*_pr_filtered_peak_ref.txt | tail -n+2 | grep -w '+' | wc -l)
-   num_minus_PRfiltered_peaks=$(cat ${dir}3b_Filter_by_PR_width/${prong}/*_pr_filtered_peak_ref.txt | tail -n+2 | grep -w '-' | wc -l)
+   num_plus_PRfiltered_peaks=$(cat ${dir}3b1_filtered_by_PR_width/${prong}/*_pr_filtered_peak_ref.txt | tail -n+2 | grep -w '+' | wc -l)
+   num_minus_PRfiltered_peaks=$(cat ${dir}3b1_filtered_by_PR_width/${prong}/*_pr_filtered_peak_ref.txt | tail -n+2 | grep -w '-' | wc -l)
    echo 'Number of PR-filtered peaks:'$'\t'${num_plus_PRfiltered_peaks}$'\t'${num_minus_PRfiltered_peaks}$'\t'$((num_plus_PRfiltered_peaks+num_minus_PRfiltered_peaks)) >> $refstats
    
    if [ $PAS_filtering == 'true' ]; then    
-      num_plus_PAS_peaks=$(tail -n+2 ${dir}3c_Filter_by_PAS_and_TES/${prong}/*peaks_with_hexamer.txt | cut -f4 | grep -w '+' | wc -l)
-      num_minus_PAS_peaks=$(tail -n+2 ${dir}3c_Filter_by_PAS_and_TES/${prong}/*peaks_with_hexamer.txt | cut -f4 | grep -w '-' | wc -l)
-      num_plus_noPAS_nearTES_peaks=$(tail -n+2 ${dir}3c_Filter_by_PAS_and_TES/${prong}/*peaks_wo_hexamer_near_TES.txt | cut -f4 | grep -w '+' | wc -l)
-      num_minus_noPAS_nearTES_peaks=$(tail -n+2 ${dir}3c_Filter_by_PAS_and_TES/${prong}/*peaks_wo_hexamer_near_TES.txt | cut -f4 | grep -w '-' | wc -l)
-      num_plus_PASfiltered_peaks=$(cat ${dir}3c_Filter_by_PAS_and_TES/${prong}/*_plus.bed | wc -l)
-      num_minus_PASfiltered_peaks=$(cat ${dir}3c_Filter_by_PAS_and_TES/${prong}/*_minus.bed | wc -l)
+      num_plus_PAS_peaks=$(tail -n+2 ${dir}3b2_filtered_by_PAS_and_TES/${prong}/*peaks_with_hexamer.txt | cut -f4 | grep -w '+' | wc -l)
+      num_minus_PAS_peaks=$(tail -n+2 ${dir}3b2_filtered_by_PAS_and_TES/${prong}/*peaks_with_hexamer.txt | cut -f4 | grep -w '-' | wc -l)
+      num_plus_noPAS_nearTES_peaks=$(tail -n+2 ${dir}3b2_filtered_by_PAS_and_TES/${prong}/*peaks_wo_hexamer_near_TES.txt | cut -f4 | grep -w '+' | wc -l)
+      num_minus_noPAS_nearTES_peaks=$(tail -n+2 ${dir}3b2_filtered_by_PAS_and_TES/${prong}/*peaks_wo_hexamer_near_TES.txt | cut -f4 | grep -w '-' | wc -l)
+      num_plus_PASfiltered_peaks=$(cat ${dir}3b2_filtered_by_PAS_and_TES/${prong}/*_plus.bed | wc -l)
+      num_minus_PASfiltered_peaks=$(cat ${dir}3b2_filtered_by_PAS_and_TES/${prong}/*_minus.bed | wc -l)
       echo 'Number of peaks with PAS:'$'\t'${num_plus_PAS_peaks}$'\t'${num_minus_PAS_peaks}$'\t'$((num_plus_PAS_peaks+num_minus_PAS_peaks)) >> $refstats
       echo 'Number of peaks without PAS but near a TES:'$'\t'${num_plus_noPAS_nearTES_peaks}$'\t'${num_minus_noPAS_nearTES_peaks}$'\t'$((num_plus_noPAS_nearTES_peaks+num_minus_noPAS_nearTES_peaks)) >> $refstats
       echo 'Number of PAS-filtered peaks:'$'\t'${num_plus_PASfiltered_peaks}$'\t'${num_minus_PASfiltered_peaks}$'\t'$((num_plus_PASfiltered_peaks+num_minus_PASfiltered_peaks)) >> $refstats
@@ -126,19 +126,19 @@ for prong in all_filtered_reads polyA_reads; do
       fprefix=${compartment}_noPASfiltering
    fi
 
-   num_plus_CovFiltered_peaks=$(cat ${dir}3e_CovFilter_ref/${prong}/${fprefix}_${prong}_3rdtu_assigned_plus.bed | wc -l)
-   num_minus_CovFiltered_peaks=$(cat ${dir}3e_CovFilter_ref/${prong}/${fprefix}_${prong}_3rdtu_assigned_minus.bed | wc -l)
+   num_plus_CovFiltered_peaks=$(cat ${dir}3b4_filtered_by_peak_coverage/${prong}/${fprefix}_${prong}_3rdtu_assigned_plus.bed | wc -l)
+   num_minus_CovFiltered_peaks=$(cat ${dir}3b4_filtered_by_peak_coverage/${prong}/${fprefix}_${prong}_3rdtu_assigned_minus.bed | wc -l)
    echo 'Number of coverage-filtered peaks:'$'\t'${num_plus_CovFiltered_peaks}$'\t'${num_minus_CovFiltered_peaks}$'\t'$((num_plus_CovFiltered_peaks+num_minus_CovFiltered_peaks)) >> $refstats
 done
 
 echo Final peaks >> $refstats
-num_plus_final_peaks=$(cat ${dir}3f_merge_two_prongs/${fprefix}_4thtu_assigned_plus.bed | wc -l)
-num_minus_final_peaks=$(cat ${dir}3f_merge_two_prongs/${fprefix}_4thtu_assigned_minus.bed | wc -l)
+num_plus_final_peaks=$(cat ${dir}3c_merged_prongs/${fprefix}_4thtu_assigned_plus.bed | wc -l)
+num_minus_final_peaks=$(cat ${dir}3c_merged_prongs/${fprefix}_4thtu_assigned_minus.bed | wc -l)
 echo 'Number of final peaks:'$'\t'${num_plus_final_peaks}$'\t'${num_minus_final_peaks}$'\t'$((num_plus_final_peaks+num_minus_final_peaks)) >> $refstats
 
 echo Peak Classification: >> $refstats
-tail -n+2 ${dir}3g_peak_classification/${fprefix}_peak_universe_classified.txt | cut -f31 | sort | uniq -c >> $refstats
+tail -n+2 ${dir}3d_classified_peaks/${fprefix}_peak_universe_classified.txt | cut -f31 | sort | uniq -c >> $refstats
 
-num_plus_fragmented_peaks=$(tail -n+2 ${dir}3h_fragmented_peaks_to_merge/${fprefix}_final_peak_universe_updated.txt | awk -v col=4 '{ if ($col == "+") {print $0} }' | cut -f32 | grep -v 'NA' | wc -l)
-num_minus_fragmented_peaks=$(tail -n+2 ${dir}3h_fragmented_peaks_to_merge/${fprefix}_final_peak_universe_updated.txt | awk -v col=4 '{ if ($col == "-") {print $0} }' | cut -f32 | grep -v 'NA' | wc -l)
+num_plus_fragmented_peaks=$(tail -n+2 ${dir}3e_fragmented_peaks_to_merge/${fprefix}_final_peak_universe_updated.txt | awk -v col=4 '{ if ($col == "+") {print $0} }' | cut -f32 | grep -v 'NA' | wc -l)
+num_minus_fragmented_peaks=$(tail -n+2 ${dir}3e_fragmented_peaks_to_merge/${fprefix}_final_peak_universe_updated.txt | awk -v col=4 '{ if ($col == "-") {print $0} }' | cut -f32 | grep -v 'NA' | wc -l)
 echo 'Number of fragmented peaks:'$'\t'${num_plus_fragmented_peaks}$'\t'${num_minus_fragmented_peaks}$'\t'$((num_plus_fragmented_peaks+num_minus_fragmented_peaks)) >> $refstats
