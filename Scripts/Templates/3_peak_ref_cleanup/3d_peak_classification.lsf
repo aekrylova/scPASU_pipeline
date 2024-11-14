@@ -20,8 +20,8 @@ compartment=compartmentname
 dir=${dir}${compartment}/
 script_dir=scriptpath
 script_dir=${script_dir}/3_peak_ref_cleanup/
-indir=${dir}3f_merge_two_prongs/
-outdir=${dir}3g_peak_classification/
+indir=${dir}3c_merged_prongs/
+outdir=${dir}3d_classified_peaks/
 
 # Argument
 PAS_filtering=false
