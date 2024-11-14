@@ -19,7 +19,7 @@ dir=dirpath
 compartment=compartmentname
 dir=${dir}${compartment}/
 prong=all_filtered_reads
-bam_dir=${dir}1e_merged_bam/
+bam_dir=${dir}1d_merged_bam/
 out_dir=${dir}2a_peaks/${prong}/
 
 # Argument
