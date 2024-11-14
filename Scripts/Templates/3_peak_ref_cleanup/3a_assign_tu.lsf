@@ -26,7 +26,7 @@ chrs=chrsname
 
 echo Assigning TU to peaks...
 for prong in all_filtered_reads polyA_reads; do
-   peaks_ref_dir=${dir}2e_intersect_run/${prong}/
+   peaks_ref_dir=${dir}2d_intersect_run/${prong}/
    outdir=${dir}3a_1st_assign_tu/${prong}/
    fprefix=${file_prefix}_${prong}_1sttu_assigned
 
