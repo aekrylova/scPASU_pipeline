@@ -18,8 +18,8 @@ compartment=compartmentname
 dir=${dir}${compartment}/
 sample=samplename
 fprefix=${sample}_${compartment}
-bamfile=${dir}1d_subset_bam/${sample}_dedup_uniq_filtered_${compartment}.bam
-outdir=${dir}4a_BamToFastq/
+bamfile=${dir}1c_subset_bam/${sample}_dedup_uniq_filtered_${compartment}.bam
+outdir=${dir}4a_bam_to_fastq/
 bamtofastq_dir=bamtofastqpath
 
 mkdir -p $outdir
