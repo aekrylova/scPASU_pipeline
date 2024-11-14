@@ -18,7 +18,7 @@ source activate scPASU_env
 dir=dirpath
 compartment=compartmentname
 dir=${dir}${compartment}/
-input_bam_dir=${dir}1e_merged_bam/
+input_bam_dir=${dir}1d_merged_bam/
 polya_dir=${dir}2b_polya/before_genomicAfiltering/
 readname_dir=${polya_dir}read_names/
 output_bam_dir=${polya_dir}bam_files/
