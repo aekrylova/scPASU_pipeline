@@ -22,7 +22,7 @@ file_prefix=${compartment}
 script_dir=scriptpath
 script_dir=${script_dir}/3_peak_ref_cleanup/
 ref_genome=fastapath
-bam_dir=${dir}1e_merged_bam/
+bam_dir=${dir}1d_merged_bam/
 bam=${bam_dir}dedup_uniq_genomicAfiltered_merged.bam
 chrs=chrsname
 bedtools_dir=bedtoolspath
@@ -48,7 +48,7 @@ for prong in all_filtered_reads polyA_reads; do
    # 1. Filter by PR length
 
    echo Filter by PR width...
-   out1=${dir}3b_Filter_by_PR_width/${prong}/
+   out1=${dir}3b1_filtered_by_PR_width/${prong}/
    mkdir -p ${out1}
    Rscript ${script_dir}3b1_filter_by_pr_width.R -r ${ref} -o ${out1} -f ${fprefix1} -m ${maxwidth}
 
@@ -60,7 +60,7 @@ for prong in all_filtered_reads polyA_reads; do
    then
       echo Perform filtering by PAS...
       echo Prepare bed input for hexamer checking...
-      out2=${dir}3c_Filter_by_PAS_and_TES/${prong}/
+      out2=${dir}3b2_filtered_by_PAS_and_TES/${prong}/
       mkdir -p ${out2}
       Rscript ${script_dir}3b2_hexamer_check_bed_input.R -r ${ref1} -o ${out2} -f ${fprefix1} -e ${pr_extn}
 
@@ -101,7 +101,7 @@ for prong in all_filtered_reads polyA_reads; do
 
    echo Get peak counts using ${bam}...
    ref_saf=${out2}${fprefix2}_peak_universe_updated.saf
-   out3=${dir}3d_PeakCoverage/${prong}/
+   out3=${dir}3b3_peak_coverage_stats/${prong}/
    mkdir -p ${out3}
    Rscript ${script_dir}feature_counts.R -b ${bam} -r ${ref_saf} -o ${out3} -f ${fprefix1} -c ${cores} -i no
 
@@ -123,7 +123,7 @@ for prong in all_filtered_reads polyA_reads; do
 
    # 3d. Filter peak ref
    echo Filter peak ref by coverage...
-   out4=${dir}3e_CovFilter_ref/${prong}/
+   out4=${dir}3b4_filtered_by_peak_coverage/${prong}/
    mkdir -p ${out4}
    pcov_file=${out3}${fprefix1}_peak_count_updated.rds
    Rscript ${script_dir}3b4_filter_peak_ref.R -r ${ref2b} -p ${pcov_file} -o ${out4} -f ${fprefix1} -m ${min_cov}
