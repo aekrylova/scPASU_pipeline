@@ -4,10 +4,10 @@
 #BSUB -n 16
 #BSUB -M 16
 #BSUB -R rusage[mem=16]
-#BSUB -o /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/output/runname_compartmentname_2a_all_filtered_reads_sam_to_polyA.%J.out
-#BSUB -e /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/error/runname_compartmentname_2a_all_filtered_reads_sam_to_polyA.%J.err
+#BSUB -o /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/output/runname_compartmentname_2b1_all_filtered_reads_sam_to_polyA.%J.out
+#BSUB -e /rsrch6/scratch/mol_cgenesis/bnle/bsub_jobs/error/runname_compartmentname_2b1_all_filtered_reads_sam_to_polyA.%J.err
 #BSUB -q e40medium
-#BSUB -J runname_compartmentname_2a_all_filtered_reads_sam_to_polyA
+#BSUB -J runname_compartmentname_2b1_all_filtered_reads_sam_to_polyA
 #BSUB -u bnle@mdanderson.org
 #BSUB -B
 #BSUB -N
@@ -19,7 +19,7 @@ dir=dirpath
 compartment=compartmentname
 dir=${dir}${compartment}/
 fasta=fastapath
-bam_dir=${dir}1e_merged_bam/
+bam_dir=${dir}1d_merged_bam/
 polya_dir=${dir}2b_polya/after_genomicAfiltering/
 script_dir=scriptpath
 script_dir=${script_dir}/2_peak_ref/
