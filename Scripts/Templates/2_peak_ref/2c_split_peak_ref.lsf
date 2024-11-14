@@ -40,14 +40,14 @@ for prong in all_filtered_reads polyA_reads; do
     fprefix=${file_prefix}_${prong}
     bw_dir=${dir}ucsc_tracks/bigwig_tracks/${binsize}bp/${prong}/
     summit_dir=${dir}2a_peaks/${prong}/
-    bg_dir=${dir}2c_alignment_signals/${prong}/
-    outdir=${dir}2d_split_peaks/${prong}/
+    bg_dir=${dir}2c1_alignment_signals/${prong}/
+    outdir=${dir}2c2_split_peaks/${prong}/
 
     mkdir -p $bw_dir    
     mkdir -p $bg_dir
 
     if [ $prong == 'all_filtered_reads' ]; then
-       export bam_dir=${dir}1e_merged_bam/
+       export bam_dir=${dir}1d_merged_bam/
        export direction=3
     elif [ $prong == 'polyA_reads' ]; then
        export bam_dir=${dir}2b_polya/before_genomicAfiltering/bam_files/
