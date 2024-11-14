@@ -32,7 +32,7 @@ polyA_reads_min_polya=1
 
 for prong in all_filtered_reads polyA_reads; do
    echo For $prong prong...
-   macs_dir=${dir}2d_split_peaks/${prong}/ 
+   macs_dir=${dir}2c2_split_peaks/${prong}/ 
    if [ $prong == 'all_filtered_reads' ]; then
       export polya_dir=${dir}2b_polya/after_genomicAfiltering/
       export min_polya=${all_filtered_reads_min_polya}
@@ -40,7 +40,7 @@ for prong in all_filtered_reads polyA_reads; do
       export polya_dir=${dir}2b_polya/before_genomicAfiltering/
       export min_polya=${polyA_reads_min_polya}
    fi
-   outdir=${dir}2e_intersect_run/${prong}/
+   outdir=${dir}2d_intersect_run/${prong}/
    if [ ! -d "$outdir" ]; then
       mkdir -p $outdir
    fi
