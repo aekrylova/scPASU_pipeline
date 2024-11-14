@@ -23,10 +23,10 @@ dir=${dir}${compartment}/
 script_dir=/rsrch6/scratch/mol_cgenesis/bnle/test_scPASU_run/Scripts/immune
 script_dir=${script_dir}/3_peak_ref_cleanup/
 ref_genome=/rsrch6/scratch/mol_cgenesis/bnle/GRCh38/fasta/genome.fa
-in=${dir}3g_peak_classification/
-out=${dir}3h_fragmented_peaks_to_merge/
-bamdir=${dir}1e_merged_bam/
-refdir=${dir}3f_merge_two_prongs/
+in=${dir}3d_classified_peaks/
+out=${dir}3e_fragmented_peaks_to_merge/
+bamdir=${dir}1d_merged_bam/
+refdir=${dir}3c_merged_prongs/
 ucsc_utilities_dir=/rsrch6/scratch/mol_cgenesis/bnle/
 
 # Argument
