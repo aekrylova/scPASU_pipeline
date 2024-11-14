@@ -21,7 +21,7 @@ genome=genomename_${fprefix}
 fasta=fastapath
 script_dir=scriptpath
 script_dir=${script_dir}/4_count_matrix/
-wd=${dir}3h_fragmented_peaks_to_merge/
+wd=${dir}3e_fragmented_peaks_to_merge/
 cellranger_dir=cellrangerpath
 
 # Add tool paths to environmental path
