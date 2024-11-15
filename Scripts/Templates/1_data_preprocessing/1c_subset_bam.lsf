@@ -13,13 +13,11 @@
 #BSUB -N
 
 source activate scPASU_env
-
-# Variable
+subset=true
 dir=dirpath
 compartment=compartmentname
 outdir=${dir}${compartment}/
 sample=samplename
-barcode_file=${outdir}/barcode/${sample}_${compartment}_barcodes.tsv
 bam_dir_before_genomicAfiltered=${dir}1a2_clean_bam/
 bam_dir_after_genomicAfiltered=${dir}1b_filtered_bam/
 bam_output_before_genomicAfiltered=${sample}_dedup_uniq_${compartment}.bam
@@ -27,23 +25,30 @@ bam_output_after_genomicAfiltered=${sample}_dedup_uniq_filtered_${compartment}.b
 subset_dir=${outdir}1c_subset_bam/
 subsetbam_dir=subsetbampath
 
-# Add tool paths to environmental path
-export PATH=${subsetbam_dir}:$PATH
-
-# Argument
-NTHREADS=32
-
 ## Subset ##
 if [ ! -d "$subset_dir" ]; then
   mkdir -p $subset_dir
 fi
 
-echo Subset-bam for the $compartment compartment before genomicA filtering...
-subset-bam -b ${bam_dir_before_genomicAfiltered}${sample}_dedup_uniq.bam -c ${barcode_file} -o ${subset_dir}${bam_output_before_genomicAfiltered} --log-level debug --cores $NTHREADS
-echo 'Indexing the last bam file...'
-samtools index ${subset_dir}${bam_output_before_genomicAfiltered}
+if [ $subset == "true" ]; then
+  # Variable
+  barcode_file=${outdir}/barcode/${sample}_${compartment}_barcodes.tsv
+  
+  # Add tool paths to environmental path
+  export PATH=${subsetbam_dir}:$PATH
 
-echo Subset-bam for the $compartment compartment after genomicA filtering...
-subset-bam -b ${bam_dir_after_genomicAfiltered}${sample}_dedup_uniq_filtered_2ndround.bam -c ${barcode_file} -o ${subset_dir}${bam_output_after_genomicAfiltered} ---log-level debug --cores $NTHREADS
-echo 'Indexing the last bam file...'
-samtools index ${subset_dir}${bam_output_after_genomicAfiltered}
+  # Argument
+  NTHREADS=32
+
+  echo Subset-bam for the $compartment compartment before genomicA filtering...
+  subset-bam -b ${bam_dir_before_genomicAfiltered}${sample}_dedup_uniq.bam -c ${barcode_file} -o ${subset_dir}${bam_output_before_genomicAfiltered} --log-level debug --cores $NTHREADS
+  echo 'Indexing the last bam file...'
+  samtools index ${subset_dir}${bam_output_before_genomicAfiltered}
+
+  echo Subset-bam for the $compartment compartment after genomicA filtering...
+  subset-bam -b ${bam_dir_after_genomicAfiltered}${sample}_dedup_uniq_filtered_2ndround.bam -c ${barcode_file} -o ${subset_dir}${bam_output_after_genomicAfiltered} ---log-level debug --cores $NTHREADS
+  echo 'Indexing the last bam file...'
+  samtools index ${subset_dir}${bam_output_after_genomicAfiltered}
+
+else
+  
